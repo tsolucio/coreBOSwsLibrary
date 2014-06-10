@@ -8,16 +8,16 @@ You can find additional information on the usage of the libraries in the [coreBO
 These libraries have been built using several other open source libraries whose details are given below:
 
 CURL based HTTP Client
-======
+=====
 http://www.phpclasses.org/browse/package/3329.html
 http://www.opensource.org/licenses/bsd-license.html
 
 JQuery
-======
+=====
 http://jquery.com/
 
 Javascript md5 library from webtoolkit
-======
+=====
 
 **NOTE**
 ======
