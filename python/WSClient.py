@@ -1,7 +1,7 @@
 # Setup include path for dependent libraries
 import sys, os, string
 JSON_DIR = string.rstrip(__file__, (os.sep + os.path.basename(__file__)))
-JSON_DIR += os.sep + '..' + os.sep + 'third-party' + os.sep + 'python'
+#JSON_DIR += os.sep + '..' + os.sep + 'third-party' + os.sep + 'python'
 # Include in sys path
 if JSON_DIR not in sys.path:
     sys.path.append(JSON_DIR)
