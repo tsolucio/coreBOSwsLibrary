@@ -1,7 +1,11 @@
 <?php
 
-require_once('vtwsclib/Vtiger/Net/HTTP_Client.php');
-require_once('vtwsclib/Vtiger/WSVersion.php');
+global $coreBOS_Basedir;
+if (empty($coreBOS_Basedir)) {
+	$coreBOS_Basedir = dirname(__FILE__);
+}
+require_once $coreBOS_Basedir.'/Net/HTTP_Client.php';
+require_once $coreBOS_Basedir.'/WSVersion.php';
 
 /**
  * Vtiger Webservice Client
@@ -36,7 +40,7 @@ class Vtiger_WSClient {
 	 */
 	function __construct($url) { 
 		$this->_serviceurl = $this->getWebServiceURL($url);
-		$this->_client = new Vtiger_HTTP_Client($this->_serviceurl);
+		$this->_client = new cbHTTP_Client($this->_serviceurl);
 	}
 
 	/**
@@ -51,7 +55,7 @@ class Vtiger_WSClient {
 	 * Reinitialize the client.
 	 */
 	function reinitalize() {
-		$this->_client = new Vtiger_HTTP_Client($this->_serviceurl);
+		$this->_client = new cbHTTP_Client($this->_serviceurl);
 	}
 
 	/**
@@ -79,11 +83,11 @@ class Vtiger_WSClient {
 	 * Check if result has any error.
 	 */
 	function hasError($result) {
-		if(isset($result[success]) && $result[success] === true) {
+		if(isset($result['success']) && $result['success'] === true) {
 			$this->_lasterror = false;
 			return false;
 		}
-		$this->_lasterror = $result[error];
+		$this->_lasterror = $result['error'];
 		return true;
 	}
 
@@ -109,9 +113,9 @@ class Vtiger_WSClient {
 			return false;
 		}
 
-		$this->_servertime   = $resultdata[result][serverTime];
-		$this->_expiretime   = $resultdata[result][expireTime];
-		$this->_servicetoken = $resultdata[result][token];
+		$this->_servertime   = $resultdata['result']['serverTime'];
+		$this->_expiretime   = $resultdata['result']['expireTime'];
+		$this->_servicetoken = $resultdata['result']['token'];
 		return true;
 	}
 
@@ -125,30 +129,16 @@ class Vtiger_WSClient {
 	}
 
 	/**
-	 * JSONify input data.
-	 */
-	function toJSON($input) {
-		return $this->_client->__jsondecode($input);
-	}
-
-	/**
-	 * Convert input data to JSON String.
-	 */
-	function toJSONString($input) {
-		return $this->_client->__jsonencode($input);
-	}
-
-	/**
 	 * Do Login Operation
 	 */
-	function doLogin($username, $vtigerUserAccesskey) {
+	function doLogin($username, $userAccesskey) {
 		// Do the challenge before login
 		if($this->__doChallenge($username) === false) return false;
 		
 		$postdata = Array(
 			'operation' => 'login',
 			'username'  => $username,
-			'accessKey' => md5($this->_servicetoken.$vtigerUserAccesskey)
+			'accessKey' => md5($this->_servicetoken.$userAccesskey)
 		);
 		$resultdata = $this->_client->doPost($postdata, true);
 
@@ -156,10 +146,10 @@ class Vtiger_WSClient {
 			return false;
 		}
 		$this->_serviceuser = $username;
-		$this->_servicekey  = $vtigerUserAccesskey;
+		$this->_servicekey  = $userAccesskey;
 
-		$this->_sessionid = $resultdata[result][sessionName];
-		$this->_userid    = $resultdata[result][userId];
+		$this->_sessionid = $resultdata['result']['sessionName'];
+		$this->_userid    = $resultdata['result']['userId'];
 		return true;
 	}
 
@@ -171,7 +161,7 @@ class Vtiger_WSClient {
 		$this->__checkLogin();
 
 		// Make sure the query ends with ;
-		$query = trim($query);		
+		$query = trim($query);
 		if(strripos($query, ';') != strlen($query)-1) $query .= ';';
 
 		$getdata = Array(
@@ -180,10 +170,11 @@ class Vtiger_WSClient {
 			'query'  => $query
 		);
 		$resultdata = $this->_client->doGet($getdata, true);
+		
 		if($this->hasError($resultdata)) {
 			return false;
 		}
-		return $resultdata[result];
+		return $resultdata['result'];
 	}
 
 	/**
@@ -201,25 +192,26 @@ class Vtiger_WSClient {
 	/**
 	 * List types available Modules.
 	 */
-	function doListTypes() {
+	function doListTypes($fieldTypeList='') {
 		// Perform re-login if required.
 		$this->__checkLogin();
 
+		if (is_array($fieldTypeList)) $fieldTypeList = json_encode($fieldTypeList);
 		$getdata = Array(
 			'operation' => 'listtypes',
-			'sessionName'  => $this->_sessionid
+			'sessionName'  => $this->_sessionid,
+			'fieldTypeList' => $fieldTypeList
 		);
 		$resultdata = $this->_client->doGet($getdata, true);
 		if($this->hasError($resultdata)) {
 			return false;
-		}		
-		$modulenames = $resultdata[result][types];
+		}
+		$modulenames = $resultdata['result']['types'];
 
 		$returnvalue = Array();
 		foreach($modulenames as $modulename) {
-			$returnvalue[$modulename] = 
-				Array ( 'name' => $modulename );
-		}		
+			$returnvalue[$modulename] = Array ( 'name' => $modulename );
+		}
 		return $returnvalue;
 	}
 
@@ -239,7 +231,7 @@ class Vtiger_WSClient {
 		if($this->hasError($resultdata)) {
 			return false;
 		}		
-		return $resultdata[result];
+		return $resultdata['result'];
 	}
 
 	/**
@@ -258,7 +250,7 @@ class Vtiger_WSClient {
 		if($this->hasError($resultdata)) {
 			return false;
 		}		
-		return $resultdata[result];
+		return $resultdata['result'];
 	}
 
 	/**
@@ -277,13 +269,35 @@ class Vtiger_WSClient {
 			'operation'   => 'create',
 			'sessionName' => $this->_sessionid,
 			'elementType' => $module,
-			'element'     => $this->toJSONString($valuemap)
+			'element'     => json_encode($valuemap)
 		);
 		$resultdata = $this->_client->doPost($postdata, true);
 		if($this->hasError($resultdata)) {
 			return false;
 		}		
-		return $resultdata[result];
+		return $resultdata['result'];
+	}
+
+	function doUpdate($module, $valuemap) {
+		// Perform re-login if required.
+		$this->__checkLogin();
+	
+		// Assign record to logged in user if not specified
+		if(!isset($valuemap['assigned_user_id'])) {
+			$valuemap['assigned_user_id'] = $this->_userid;
+		}
+	
+		$postdata = Array(
+			'operation'   => 'update',
+			'sessionName' => $this->_sessionid,
+			'elementType' => $module,
+			'element'     => json_encode($valuemap)
+		);
+		$resultdata = $this->_client->doPost($postdata, true);
+		if($this->hasError($resultdata)) {
+			return false;
+		}
+		return $resultdata['result'];
 	}
 
 	/**
@@ -316,28 +330,6 @@ class Vtiger_WSClient {
 			$resultdata = $this->_client->doGet($senddata, true);
 		}
 
-		if($this->hasError($resultdata)) {
-			return false;
-		}
-		return $resultdata[result];
-	}	
-
-	function doUpdate($module, $valuemap) {
-		// Perform re-login if required.
-		$this->__checkLogin();
-
-		// Assign record to logged in user if not specified
-		if(!isset($valuemap['assigned_user_id'])) {
-			$valuemap['assigned_user_id'] = $this->_userid;
-		}
-
-		$postdata = Array(
-			'operation'   => 'update',
-			'sessionName' => $this->_sessionid,
-			'elementType' => $module,
-			'element'     => $this->toJSONString($valuemap)
-		);
-		$resultdata = $this->_client->doPost($postdata, true);
 		if($this->hasError($resultdata)) {
 			return false;
 		}

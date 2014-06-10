@@ -1,3 +1,3 @@
 <?php
-$wsclient_version = '1.1';
+$wsclient_version = '2.0';
 ?>

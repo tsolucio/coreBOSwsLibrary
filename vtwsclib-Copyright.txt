@@ -1,12 +1,8 @@
-vtwsclib - vtiger Web service client Library
+vtwsclib - coreBOS Web service client Library
 ============================================
 
 This library has been built using several other open source libraries
 whose details are given below:
-
-Zend Frameowrk (JSON)
----------------------
-http://framework.zend.com/license/new-bsd
 
 CURL based HTTP Client
 ----------------------
@@ -17,12 +13,6 @@ JQuery
 ------
 http://jquery.com/
 
-Javascript md5 library
+Javascript md5 library from webtoolkit
 ----------------------
-http://pajhome.org.uk/crypt/md5
-
-
-Google Gears Client (gears_init.js)
------------------------------------
-http://code.google.com/apis/gears/gears_init.js
 
