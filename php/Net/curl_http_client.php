@@ -40,11 +40,11 @@ class Curl_HTTP_Client
 	 * @access protected
 	 */
 	protected $config = array(
-							CURLOPT_FAILONERROR 	=> false, 			//whether to fail if http response code is >=400
-							CURLOPT_FOLLOWLOCATION	=> true,  			//whether to follow any 'Location:..' header from response
-							CURLOPT_AUTOREFERER		=> true, 			//whether to automatically set referer for http redirections
+							CURLOPT_FAILONERROR 	=> false,			//whether to fail if http response code is >=400
+							CURLOPT_FOLLOWLOCATION	=> false,			//whether to follow any 'Location:..' header from response
+							CURLOPT_AUTOREFERER		=> true,			//whether to automatically set referer for http redirections
 							CURLOPT_ENCODING		=> 'gzip, deflate', //The contents of the Accept-Encoding header in curl request
-							CURLOPT_SSL_VERIFYPEER	=> false, 			//whether to verify ssl peer's  certificate
+							CURLOPT_SSL_VERIFYPEER	=> false,			//whether to verify ssl peer's  certificate
 							CURLOPT_HEADER			=> false,			//whether to add response headers to the output
 							CURLOPT_USERAGENT		=> 'Curl_HTTP_Client v2.0' //default user agent if none is set
 			);
