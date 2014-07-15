@@ -5,6 +5,12 @@ cbwsclib - coreBOS Web service client Library
 
 You can find additional information on the usage of the libraries in the [coreBOS documentation wiki](http://corebos.org/documentation) and tests and examples in the [coreBOS Webservice Development tool](https://github.com/tsolucio/coreBOSwsDevelopment).
 
+The *coreBOS* team is actively maintaining the PHP and Javascript versions of the library.
+
+David Fernández (kapsule) is maintaining the python version at [kapsule/coreBOSwsLibrary](https://github.com/kapsule/coreBOSwsLibrary). *Thank you* David
+
+The java library is not being maintained. Any help is appreciated.
+
 These libraries have been built using several other open source libraries whose details are given below:
 
 CURL based HTTP Client
@@ -18,10 +24,6 @@ http://jquery.com/
 
 Javascript md5 library from webtoolkit
 =====
-
-**NOTE**
-======
-The java and python libraries are not being maintained. Any help is appreciated.
 
 
 **Follow us**
