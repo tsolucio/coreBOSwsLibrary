@@ -1,282 +1,219 @@
-# Setup include path for dependent libraries
-import sys, os, string
-JSON_DIR = string.rstrip(__file__, (os.sep + os.path.basename(__file__)))
-#JSON_DIR += os.sep + '..' + os.sep + 'third-party' + os.sep + 'python'
-# Include in sys path
-if JSON_DIR not in sys.path:
-    sys.path.append(JSON_DIR)
+import urllib2
+import urllib
+import hashlib
+import json
+import re
 
-# Import required libraries
-import json, urllib
+def md5sum(s):
+    m = hashlib.md5(s)
+    return m.hexdigest()
 
-# Vtiger Webservice Client
-class Vtiger_WSClient:
-    def __init__(self, url):
-        # Webservice file
-        self._servicebase = 'webservice.php'
+class WebserviceException(Exception):
+    def __init__(self, code, message):
+        self.code = code
+        self.message = message
 
-        # Service URL to which client connects to
-        self._serviceurl   = False
+    def __str__(self):
+        return "VtigerWebserviceException(%s, %s)" % (self.code, self.message)
 
-        # Webservice login validity
-        self._servicetoken = False
-        self._expiretime   = False
-        self._servertime   = False
+def exception(response):
+    result = response['error']
+    return WebserviceException(result['code'], result['message'])
 
-        # Webservice user credentials
-        self._serviceuser  = False
-        self._servicekey   = False
+class WSClient:
+    """
+    Connect to a vtiger instance.
+    """
 
-        # Webservice login credentials
-        self._userid       = False
-        self._sessionid    = False
+    def __init__(self, service_url):
+        """
+        @param service_url:
+        """
+        self.__servicebase = 'webservice.php'
+        self.__service_url = self.get_webservice_url(service_url)
 
-        # Last operation error information
-        self._lasterror    = False
+        self.__serviceuser = ''
+        self.__servicekey = ''
 
-        if url.endswith('/') == False: url += '/'
-        if url.endswith(self._servicebase) == False: url += self._servicebase
-        self._serviceurl  = url
+        self.__servertime = 0
+        self.__expiretime = 0
+        self.__servicetoken = 0
 
-    '''
-    Perform GET request and return response
-    @url URL to connect
-    @parameters Parameter map (key, value pairs)
-    @tojson True if response should be decoded as JSON
-    '''    
-    def __doGet(self, url, parameters=False, tojson=True):
-        if not parameters: parameters = {}
-        useurl = (url + '?%s') % urllib.urlencode(parameters);
-        connection = urllib.urlopen(useurl)
-        response = connection.read()
-        if tojson == True: response = json.read(response)
-        return response
+        self.__sessionid = False
+        self.__userid = False
 
-    '''
-    Perform POST request and return response
-    @url URL to connect
-    @parameters Parameter map (key, value pairs)
-    @tojson True if response should be decoded as JSON
-    '''  
-    def __doPost(self, url, parameters=False, tojson=True):
-        if not parameters: parameters = {}
-        parameters = urllib.urlencode(parameters);
-        connection = urllib.urlopen(url, parameters)
-        response = connection.read()
-        if tojson == True: response = self.toJSON(response)
-        return response
+    def __do_get(self, **params):
+        """
+        @param params:
+        @return:
+        """
+        param_string = urllib.urlencode(params)
+        f = urllib2.urlopen('%s?%s' % (self.__service_url, param_string))
+        return json.read(f.read())
 
-    '''
-    Convert input data to JSON
-    '''
-    def toJSON(self, indata):
-        return json.read(indata)
+    def __do_post(self, **parameters):
+        """
+        @param params:
+        @return:
+        """
+        data = urllib.urlencode(parameters)
+        f = urllib2.urlopen(self.__service_url, data)
+        return json.read(f.read())
 
-    '''
-    Convert input object to JSON String
-    '''
-    def toJSONString(self, indata):
-        return json.write(indata)
+    # Get the URL for sending webservice request.
+    def get_webservice_url(self, url):
+        """
+        @param url:
+        @return:
+        """
+        url = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', url)
 
-    '''
-    Check if webservice response was not successful
-    '''
-    def hasError(self, response):
-        if not response or (response['success'] == False):
-            self._lasterror = response['error']
-            return True
-        self._lasterror = False
-        return False
-
-    '''
-    Get last operation error
-    '''
-    def lastError(self):
-        return self._lasterror
-
-    '''
-    Check webservice login.
-    '''
-    def __checkLogin(self):
-        # TODO: Perform Login Again?
-        return (self._userid != False)
-
-    '''
-    Create MD5 value (hexdigest)
-    '''
-    def __md5(self, indata):
-        import md5
-        m = md5.new()
-        m.update(indata)
-        return m.hexdigest()
-
-    '''
-    Get record id sent from the server
-    '''
-    def getRecordId(self, record):
-        ids = record.split('x')
-        return ids[1] 
-
-    '''
-    Perform Challenge operation
-    '''
-    def __doChallenge(self, username):        
-        parameters = {
-            'operation' : 'getchallenge',
-            'username' : username
-        }
-        response = self.__doGet(self._serviceurl, parameters)
-        if not self.hasError(response):
-            result = response['result']
-            self._servicetoken = result['token']
-            self._expiretime = result['expireTime']
-            self._servertime = result['serverTime']
-            return True
-        return False
-
-    '''
-    Perform Login operation
-    '''
-    def doLogin(self, username, accesskey):
-        if self.__doChallenge(username) == False: return False
-        parameters = {
-            'operation' : 'login',
-            'username'  : username,
-            'accessKey' : self.__md5(self._servicetoken + accesskey)
-        }
-        response = self.__doPost(self._serviceurl, parameters)
-        if not self.hasError(response):
-            result = response['result']
-            self._serviceuser = username
-            self._servicekey  = accesskey
-            self._sessionid   = result['sessionName']
-            self._userid      = result['userId']
-            return True
-        return False
-
-    '''
-    Perform ListTypes operation
-    @return modules names list
-    '''
-    def doListTypes(self):
-        if not self.__checkLogin(): return False
-        parameters = {
-            'operation'   : 'listtypes',
-            'sessionName' : self._sessionid
-        }
-        response = self.__doGet(self._serviceurl, parameters)
-        if self.hasError(response): return False
-        result = response['result']
-        modulenames = result['types']
-
-        returnvalue = {}
-        for modulename in modulenames:
-            returnvalue[modulename] = {
-                'name' : modulename
-            }
-        return returnvalue
-
-    '''
-    Perform Query operation
-    '''
-    def doQuery(self, query):
-        if not self.__checkLogin(): return False
-
-        # Make the query end with ;
-        if not query.endswith(';'): query += ';'
-        
-        parameters = {
-            'operation'   : 'query',
-            'sessionName' : self._sessionid,
-            'query'       : query
-        }
-        response = self.__doGet(self._serviceurl, parameters) 
-        if self.hasError(response): return False
-        result = response['result']
-        return result
-
-    '''
-    Extract column names from the query operation result.
-    '''
-    def getResultColumns(self, result):
-        if len(result) > 0:
-            return result[0].keys()
-        return False
-
-    '''
-    Perform Describe operation on the module
-    '''
-    def doDescribe(self, module):
-        if not self.__checkLogin(): return False
-        parameters = {
-            'operation'   : 'describe',
-            'sessionName' : self._sessionid,
-            'elementType' : module
-        }
-        response = self.__doGet(self._serviceurl, parameters)
-        if self.hasError(response): return False
-        result = response['result']
-        return result
-
-    '''
-    Perform Retrieve operation on the module record.
-    '''
-    def doRetrieve(self, record):
-        if not self.__checkLogin(): return False
-        parameters = {
-            'operation'   : 'retrieve',
-            'sessionName' : self._sessionid,
-            'id'          : record
-        }
-        response = self.__doGet(self._serviceurl, parameters)
-        if self.hasError(response): return False
-        result = response['result']
-        return result
-
-    '''
-    Perform create operation on the module.
-    '''
-    def doCreate(self, module, valuemap):
-        if not self.__checkLogin(): return False
-
-        if 'assigned_user_id' not in valuemap:
-            valuemap['assigned_user_id'] = self._userid
-
-        parameters = {
-            'operation'   : 'create',
-            'sessionName' : self._sessionid,
-            'elementType' : module,
-            'element'     : self.toJSONString(valuemap)
-        }
-                                
-        response = self.__doPost(self._serviceurl, parameters)
-        if self.hasError(response): return False
-        result = response['result']
-        return result
-
-    '''
-    Invoke webservice method
-    '''
-    def doInvoke(self, method, params = False, type = 'POST'):
-        if not self.__checkLogin(): return False
-
-        parameters = {
-            'operation' : method,
-            'sessionName': self._sessionid
-        }
-
-        if params is not False:
-            for key in params:
-                if not parameters.has_key(key):
-                    parameters[key] = params[key]
-
-        response = False
-        if type.upper() == 'POST':
-            response = self.__doPost(self._serviceurl, parameters)
+        if len(url) >= 1:
+            url = url[0]
+            if str(url).find(self.__servicebase) < 0:
+                if str(url[len(url) - 1:]) != '/':
+                    url += str('/')
+                url += self.__servicebase
         else:
-            response = self.__doGet(self._serviceurl, parameters)
-        if self.hasError(response): return False
-        result = response['result']
-        return result
-    
-        
+            raise 'Invalid URL'
+
+        return url
+
+    def get(self, operation, **parameters):
+        """
+        @param operation:
+        @param parameters:
+        @return: @raise exception:
+        """
+        response = self.__do_get(operation=operation, sessionName=self.__sessionid, **parameters)
+        if response['success']:
+            return response['result']
+        else:
+            raise exception(response)
+
+    def post(self, operation, **parameters):
+        """
+        @param operation:
+        @param parameters:
+        @return: @raise exception:
+        """
+        response = self.__do_post(
+            operation=operation,
+            sessionName=self.__sessionid,
+            **parameters)
+        if response['success']:
+            return response['result']
+        else:
+            raise exception(response)
+
+    #Perform the challenge
+    def __do_challenge(self):
+        """
+        @return: @raise exception:
+        """
+        response = self.__do_get(operation='getchallenge', username=self.__serviceuser)
+        if response['success']:
+            self.__servicetoken = response['result']['token']
+            self.__servertime = response['result']['serverTime']
+            self.__expiretime = response['result']['expireTime']
+            return True
+        else:
+            raise exception(response)
+
+    #Do Login Operation
+    def do_login(self, user, user_accesskey):
+        """
+        @param user:
+        @param user_accesskey:
+        @return:
+        """
+        self.__serviceuser = user
+        self.__servicekey = user_accesskey
+
+        if not self.__do_challenge():
+            return False
+
+        key = md5sum(self.__servicetoken + user_accesskey)
+        response = self.__do_post(operation='login', username=user, accessKey=key)
+
+        if response['success']:
+            self.__sessionid = response['result']['sessionName']
+            self.__userid = response['result']['userId']
+            return True
+        else:
+            raise exception(response)
+
+    def logout(self):
+        if self.__sessionid != 0:
+            self.post('logout')
+
+    #List types available Modules.
+    @property
+    def do_listtypes(self):
+        return self.get('listtypes')
+
+    #Describe Module Fields.
+    def do_describe(self, name):
+        """
+        @param name:
+        @return:
+        """
+        return self.get('describe', elementType=name)
+
+    #Do Create Operation
+    def do_create(self, entity, params):
+        """
+        @param entity:
+        @param params:
+        @return:
+        """
+        json_data = json.write(params)
+        return self.post('create', elementType=entity, element=json_data)
+
+    #Retrieve details of record.
+    def do_retrieve(self, id):
+        """
+        @param id:
+        @return:
+        """
+        return self.get('retrieve', id=id)
+
+    #Do Update Operation
+    def do_update(self, params):
+        """
+        @param obj:
+        @return:
+        """
+        json_data = json.write(params)
+        return self.post('update', element=json_data)
+
+    #Do Delete Operation
+    def do_delete(self, id):
+        """
+        @param id:
+        @return:
+        """
+        return self.post('delete', id=id)
+
+    #Do Query Operation
+    def do_query(self, query):
+        """
+        @param query:
+        @return:
+        """
+        return self.get('query', query=query)
+
+    #Invoke custom operation
+    def do_invoke(self, metod, params, metod_type='POST'):
+        """
+        @param metod:
+        @param params:
+        @param metod_type:
+        @return:
+        """
+        if metod_type.upper() == 'POST':
+            response = self.post(metod, **params)
+        else:
+            response = self.get(metod, **params)
+
+        return response
