@@ -62,7 +62,7 @@ class JsonReader(object):
         if peek == '{':
             return self._readObject()
         elif peek == '[':
-            return self._readArray()            
+            return self._readArray()
         elif peek == '"':
             return self._readString()
         elif peek == '-' or peek.isdigit():
@@ -245,7 +245,7 @@ class JsonReader(object):
         return self._generator.next()
 
 class JsonWriter(object):
-        
+
     def _append(self, s):
         self._results.append(s)
 
