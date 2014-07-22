@@ -1,11 +1,9 @@
 <?php
-
 global $coreBOS_Basedir;
 if (empty($coreBOS_Basedir)) {
 	$coreBOS_Basedir = dirname(__FILE__);
 }
 require_once $coreBOS_Basedir.'/Net/HTTP_Client.php';
-require_once $coreBOS_Basedir.'/WSVersion.php';
 
 /**
  * Vtiger Webservice Client
@@ -35,6 +33,9 @@ class Vtiger_WSClient {
 	// Last operation error information
 	var $_lasterror  = false;
 
+	// Version
+	var $wsclient_version = 'coreBOS2.1';
+	
 	/**
 	 * Constructor.
 	 */
@@ -47,8 +48,7 @@ class Vtiger_WSClient {
 	 * Return the client library version.
 	 */
 	function version() {
-		global $wsclient_version;
-		return $wsclient_version;
+		return $this->wsclient_version;
 	}
 
 	/**
@@ -345,7 +345,7 @@ class Vtiger_WSClient {
 
 		$postdata = Array(
 			'operation' => 'getRelatedRecords',
-			'sessionName'  => $this->_sessionid,
+			'sessionName' => $this->_sessionid,
 			'id' => $record,
 			'module' => $module,
 			'relatedModule' => $relatedModule,
@@ -356,6 +356,28 @@ class Vtiger_WSClient {
 			return false;
 		}
 		return $resultdata['result']['records'];
+	}
+
+	/**
+	 * Set relation between records.
+	 * param relate_this_id string ID of record we want to related other records with
+	 * param with_this_ids string/array either a string with one unique ID or an array of IDs to relate to the first parameter
+	 */
+	function doSetRelated($relate_this_id, $with_this_ids) {
+		// Perform re-login if required.
+		$this->__checkLogin();
+		
+		$postdata = Array(
+			'operation' => 'SetRelation',
+			'sessionName' => $this->_sessionid,
+			'relate_this_id' => $relate_this_id,
+			'with_this_ids' => json_encode($with_this_ids),
+		);
+		$resultdata = $this->_client->doPost($postdata, true);
+		if($this->hasError($resultdata)) {
+			return false;
+		}
+		return $resultdata['result'];
 	}
 }
 ?>
