@@ -21,12 +21,15 @@ var Vtiger_WSClient = function(url) {
 	// Last operation error information
 	this._lasterror  = false;
 
+	// Version
+	this.version = 'coreBOS2.1';
+
 	/**
 	 * JSONify input data.
 	 */
 	this.toJSON = function(input) {
 		return JSON.parse(input);
-    };
+	};
 
 	/**
 	 * Get actual record id from the response id.
@@ -400,13 +403,76 @@ var Vtiger_WSClient = function(url) {
 			}
 		});
 	};
+
+	/**
+	 * Retrieve related records.
+	 */
+	this.doGetRelatedRecords = function(record, module, relatedModule, queryParameters, callback) {
+		// Perform re-login if required.
+		this.__checkLogin();
+		var reqtype = 'POST';
+		var sendata = {
+			'operation' : 'getRelatedRecords',
+			'sessionName' : this._sessionid,
+			'id' : record,
+			'module' : module,
+			'relatedModule' : relatedModule,
+			'queryParameters' : this.toJSONString(queryParameters),
+		};
+		jQuery.ajax({
+			url : this._serviceurl,
+			type: reqtype,
+			data: sendata,
+			// Pass reference to the client to use it inside callback function.
+			_wsclient : this,
+			complete  : function(res, status) {
+				var usethis = this._wsclient;
+				var resobj  = usethis.toJSON(res.responseText);
+				var result  = false;
+				if(!usethis.hasError(resobj)) result = resobj['result'];
+				usethis.__performCallback(callback, result);
+			}
+		});
+	};
+
+	/**
+	 * Set relation between records.
+	 * param relate_this_id string ID of record we want to related other records with
+	 * param with_this_ids string/array either a string with one unique ID or an array of IDs to relate to the first parameter
+	 */
+	this.doSetRelated = function(relate_this_id, with_this_ids, callback) {
+		// Perform re-login if required.
+		this.__checkLogin();
+		var reqtype = 'POST';
+		var sendata = {
+			'operation' : 'SetRelation',
+			'sessionName' : this._sessionid,
+			'relate_this_id' : relate_this_id,
+			'with_this_ids' : this.toJSONString(with_this_ids),
+		};
+		jQuery.ajax({
+			url : this._serviceurl,
+			type: reqtype,
+			data: sendata,
+			// Pass reference to the client to use it inside callback function.
+			_wsclient : this,
+			complete  : function(res, status) {
+				var usethis = this._wsclient;
+				var resobj  = usethis.toJSON(res.responseText);
+				var result  = false;
+				if(!usethis.hasError(resobj)) result = resobj['result'];
+				usethis.__performCallback(callback, result);
+			}
+		});
+	};
+
 };
 
 /**
  * Return significant message on toString.
  */
 Vtiger_WSClient.prototype.toString = function(){
-	return 	"[Vtiger_WSClient]";
+	return 	"[coreBOS_WSClient]";
 };
 
 /*******************************************************************************
