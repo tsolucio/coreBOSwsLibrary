@@ -35,6 +35,7 @@ var Vtiger_WSClient = function(url) {
 	 * Get actual record id from the response id.
 	 */
 	this.getRecordId = function(id) {
+		if (typeof id === 'undefined') return 0;
 		var ids = id.split('x');
 		return ids[1];
 	};
