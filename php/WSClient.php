@@ -363,7 +363,7 @@ class Vtiger_WSClient {
 	 * param relate_this_id string ID of record we want to related other records with
 	 * param with_this_ids string/array either a string with one unique ID or an array of IDs to relate to the first parameter
 	 */
-	function doSetRelated($relate_this_id, $with_this_ids) {
+	function doSetRelated($relate_this_id, $with_these_ids) {
 		// Perform re-login if required.
 		$this->__checkLogin();
 		
@@ -371,7 +371,7 @@ class Vtiger_WSClient {
 			'operation' => 'SetRelation',
 			'sessionName' => $this->_sessionid,
 			'relate_this_id' => $relate_this_id,
-			'with_this_ids' => json_encode($with_this_ids),
+			'with_these_ids' => json_encode($with_these_ids),
 		);
 		$resultdata = $this->_client->doPost($postdata, true);
 		if($this->hasError($resultdata)) {

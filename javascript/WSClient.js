@@ -441,7 +441,7 @@ var Vtiger_WSClient = function(url) {
 	 * param relate_this_id string ID of record we want to related other records with
 	 * param with_this_ids string/array either a string with one unique ID or an array of IDs to relate to the first parameter
 	 */
-	this.doSetRelated = function(relate_this_id, with_this_ids, callback) {
+	this.doSetRelated = function(relate_this_id, with_these_ids, callback) {
 		// Perform re-login if required.
 		this.__checkLogin();
 		var reqtype = 'POST';
@@ -449,7 +449,7 @@ var Vtiger_WSClient = function(url) {
 			'operation' : 'SetRelation',
 			'sessionName' : this._sessionid,
 			'relate_this_id' : relate_this_id,
-			'with_this_ids' : this.toJSONString(with_this_ids),
+			'with_these_ids' : this.toJSONString(with_these_ids),
 		};
 		jQuery.ajax({
 			url : this._serviceurl,
