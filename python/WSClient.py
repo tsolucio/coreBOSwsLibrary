@@ -4,6 +4,14 @@ import hashlib
 import json
 import re
 
+__author__ = 'David Fernández González'
+__license__ = 'GPLv3+'
+__version__ = '0.1.1'
+__maintainer__ = 'David Fernández González'
+__email__ = 'dfernandez.parking@gmail.com'
+__status__ = 'Development'
+__credits__ = []
+
 def md5sum(s):
     m = hashlib.md5(s)
     return m.hexdigest()
@@ -24,7 +32,6 @@ class WSClient:
     """
     Connect to a vtiger instance.
     """
-
     def __init__(self, service_url):
         """
         @param service_url:
@@ -85,7 +92,12 @@ class WSClient:
         @param parameters:
         @return: @raise exception:
         """
-        response = self.__do_get(operation=operation, sessionName=self.__sessionid, **parameters)
+        response = self.__do_get(
+            operation=operation,
+            sessionName=self.__sessionid,
+            **parameters
+        )
+
         if response['success']:
             return response['result']
         else:
@@ -101,17 +113,29 @@ class WSClient:
             operation=operation,
             sessionName=self.__sessionid,
             **parameters)
+
         if response['success']:
             return response['result']
         else:
             raise exception(response)
+
+    # Check and perform login if requried.
+    def __check_login(self):
+        if self.__sessionid != 0:
+            return True
+        else:
+            return False
 
     #Perform the challenge
     def __do_challenge(self):
         """
         @return: @raise exception:
         """
-        response = self.__do_get(operation='getchallenge', username=self.__serviceuser)
+        response = self.__do_get(
+            operation='getchallenge',
+            username=self.__serviceuser
+        )
+
         if response['success']:
             self.__servicetoken = response['result']['token']
             self.__servertime = response['result']['serverTime']
@@ -134,7 +158,11 @@ class WSClient:
             return False
 
         key = md5sum(self.__servicetoken + user_accesskey)
-        response = self.__do_post(operation='login', username=user, accessKey=key)
+        response = self.__do_post(
+            operation='login',
+            username=user,
+            accessKey=key
+        )
 
         if response['success']:
             self.__sessionid = response['result']['sessionName']
@@ -150,6 +178,9 @@ class WSClient:
     #List types available Modules.
     @property
     def do_listtypes(self):
+        if not self.__check_login():
+            raise Exception('Login error')
+
         return self.get('listtypes')
 
     #Describe Module Fields.
@@ -158,7 +189,13 @@ class WSClient:
         @param name:
         @return:
         """
-        return self.get('describe', elementType=name)
+        if not self.__check_login():
+            raise Exception('Login error')
+
+        return self.get(
+            'describe',
+            elementType=name
+        )
 
     #Do Create Operation
     def do_create(self, entity, params):
@@ -167,8 +204,15 @@ class WSClient:
         @param params:
         @return:
         """
+        if not self.__check_login():
+            raise Exception('Login error')
+
         json_data = json.write(params)
-        return self.post('create', elementType=entity, element=json_data)
+        return self.post(
+            'create',
+            elementType=entity,
+            element=json_data
+        )
 
     #Retrieve details of record.
     def do_retrieve(self, id):
@@ -176,7 +220,13 @@ class WSClient:
         @param id:
         @return:
         """
-        return self.get('retrieve', id=id)
+        if not self.__check_login():
+            raise Exception('Login error')
+
+        return self.get(
+            'retrieve',
+            id=id
+        )
 
     #Do Update Operation
     def do_update(self, params):
@@ -184,8 +234,14 @@ class WSClient:
         @param obj:
         @return:
         """
+        if not self.__check_login():
+            raise Exception('Login error')
+
         json_data = json.write(params)
-        return self.post('update', element=json_data)
+        return self.post(
+            'update',
+            element=json_data
+        )
 
     #Do Delete Operation
     def do_delete(self, id):
@@ -193,7 +249,13 @@ class WSClient:
         @param id:
         @return:
         """
-        return self.post('delete', id=id)
+        if not self.__check_login():
+            raise Exception('Login error')
+
+        return self.post(
+            'delete',
+            id=id
+        )
 
     #Do Query Operation
     def do_query(self, query):
@@ -201,7 +263,13 @@ class WSClient:
         @param query:
         @return:
         """
-        return self.get('query', query=query)
+        if not self.__check_login():
+            raise Exception('Login error')
+
+        return self.get(
+            'query',
+            query=query
+        )
 
     #Invoke custom operation
     def do_invoke(self, metod, params, metod_type='POST'):
@@ -211,9 +279,53 @@ class WSClient:
         @param metod_type:
         @return:
         """
+        if not self.__check_login():
+            raise Exception('Login error')
+
         if metod_type.upper() == 'POST':
             response = self.post(metod, **params)
         else:
             response = self.get(metod, **params)
 
+        return response
+
+    def do_get_related_records(self, record, module, relatedmodule, queryparameters):
+        """
+        * Retrieve related records.
+
+        :param module:
+        :param relatedModule:
+        :param queryParameters:
+        :raise 'Login error':
+        """
+        if not self.__check_login():
+            raise Exception('Login error')
+
+        params = dict(
+            id=record,
+            module=module,
+            relatedModule=relatedmodule,
+            queryParameters=queryparameters
+        )
+        response = self.post('getRelatedRecords', **params)
+        return response
+
+    def do_set_related(self, relate_this_id, with_this_ids):
+        """
+        * Set relation between records.
+	    * param relate_this_id string ID of record we want to related other records with
+	    * param with_this_ids string/array either a string with one unique ID or an array of IDs to relate to the first parameter
+
+        :param relate_this_id:
+        :param with_this_ids:
+        :raise 'Login error':
+        """
+        if not self.__check_login():
+            raise Exception('Login error')
+
+        params = dict(
+            relate_this_id=relate_this_id,
+            with_these_ids=with_this_ids
+        )
+        response = self.post('SetRelation', **params)
         return response
