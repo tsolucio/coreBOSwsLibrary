@@ -7,7 +7,7 @@ You can find additional information on the usage of the libraries in the [coreBO
 
 The *coreBOS* team is actively maintaining the PHP and Javascript versions of the library.
 
-David Fernández (kapsule) is maintaining the python version at [kapsule/coreBOSwsLibrary](https://github.com/kapsule/coreBOSwsLibrary). *Thank you* David
+David Fernández (kapsule) is maintaining the python and .NET (csharp) versions at [kapsule/coreBOSwsLibrary](https://github.com/kapsule/coreBOSwsLibrary) while they are being kept in sync here for easy access. *Thank you* David
 
 The java library is not being maintained. Any help is appreciated.
 
