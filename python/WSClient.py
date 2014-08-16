@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import urllib2
 import urllib
 import hashlib
@@ -82,7 +84,7 @@ class WSClient:
                     url += str('/')
                 url += self.__servicebase
         else:
-            raise 'Invalid URL'
+            raise Exception('Invalid URL')
 
         return url
 
@@ -126,14 +128,14 @@ class WSClient:
         else:
             return False
 
-    #Perform the challenge
-    def __do_challenge(self):
+    # Perform the challenge
+    def __do_challenge(self, user_name):
         """
         @return: @raise exception:
         """
         response = self.__do_get(
             operation='getchallenge',
-            username=self.__serviceuser
+            username=user_name
         )
 
         if response['success']:
@@ -144,29 +146,28 @@ class WSClient:
         else:
             raise exception(response)
 
-    #Do Login Operation
-    def do_login(self, user, user_accesskey):
+    # Do Login Operation
+    def do_login(self, user_name, user_accesskey):
         """
-        @param user:
+        @param user_name:
         @param user_accesskey:
         @return:
         """
-        self.__serviceuser = user
-        self.__servicekey = user_accesskey
-
-        if not self.__do_challenge():
+        if not self.__do_challenge(user_name):
             return False
 
         key = md5sum(self.__servicetoken + user_accesskey)
         response = self.__do_post(
             operation='login',
-            username=user,
+            username=user_name,
             accessKey=key
         )
 
         if response['success']:
             self.__sessionid = response['result']['sessionName']
             self.__userid = response['result']['userId']
+            self.__serviceuser = user_name
+            self.__servicekey = user_accesskey
             return True
         else:
             raise exception(response)
@@ -175,7 +176,7 @@ class WSClient:
         if self.__sessionid != 0:
             self.post('logout')
 
-    #List types available Modules.
+    # List types available Modules.
     @property
     def do_listtypes(self):
         if not self.__check_login():
@@ -183,7 +184,7 @@ class WSClient:
 
         return self.get('listtypes')
 
-    #Describe Module Fields.
+    # Describe Module Fields.
     def do_describe(self, name):
         """
         @param name:
@@ -197,7 +198,7 @@ class WSClient:
             elementType=name
         )
 
-    #Do Create Operation
+    # Do Create Operation
     def do_create(self, entity, params):
         """
         @param entity:
@@ -214,7 +215,7 @@ class WSClient:
             element=json_data
         )
 
-    #Retrieve details of record.
+    # Retrieve details of record.
     def do_retrieve(self, id):
         """
         @param id:
@@ -231,7 +232,7 @@ class WSClient:
     #Do Update Operation
     def do_update(self, params):
         """
-        @param obj:
+        @param params:
         @return:
         """
         if not self.__check_login():
@@ -294,8 +295,8 @@ class WSClient:
         * Retrieve related records.
 
         :param module:
-        :param relatedModule:
-        :param queryParameters:
+        :param relatedmodule:
+        :param queryparameters:
         :raise 'Login error':
         """
         if not self.__check_login():
