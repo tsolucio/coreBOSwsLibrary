@@ -7,7 +7,7 @@ import json
 import re
 
 __author__ = 'David Fernández González'
-__license__ = 'GPLv3+'
+__license__ = 'LGPL'
 __version__ = '0.1.1'
 __maintainer__ = 'David Fernández González'
 __email__ = 'dfernandez.parking@gmail.com'
