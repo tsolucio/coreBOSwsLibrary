@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("David Fernández González")]
 [assembly: AssemblyProduct("coreBOSNet")]
-[assembly: AssemblyCopyright("GPLv3")]
+[assembly: AssemblyCopyright("LGPL")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
