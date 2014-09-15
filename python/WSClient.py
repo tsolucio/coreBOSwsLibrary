@@ -1,4 +1,20 @@
 # -*- coding: utf-8 -*-
+'''
+Copyright (c) 2014, David Fernández González, All rights reserved.
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 3.0 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library.
+'''
 
 import urllib2
 import urllib
@@ -7,7 +23,7 @@ import json
 import re
 
 __author__ = 'David Fernández González'
-__license__ = 'GPLv3+'
+__license__ = 'LGPL'
 __version__ = '0.1.1'
 __maintainer__ = 'David Fernández González'
 __email__ = 'dfernandez.parking@gmail.com'
