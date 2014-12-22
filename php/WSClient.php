@@ -131,14 +131,14 @@ class Vtiger_WSClient {
 	/**
 	 * Do Login Operation
 	 */
-	function doLogin($username, $userAccesskey) {
+	function doLogin($username, $userAccesskey, $withpassword=false) {
 		// Do the challenge before login
 		if($this->__doChallenge($username) === false) return false;
 		
 		$postdata = Array(
 			'operation' => 'login',
 			'username'  => $username,
-			'accessKey' => md5($this->_servicetoken.$userAccesskey)
+			'accessKey' => ($withpassword ? $this->_servicetoken + accesskey : md5($this->_servicetoken.$userAccesskey))
 		);
 		$resultdata = $this->_client->doPost($postdata, true);
 

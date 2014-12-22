@@ -124,7 +124,7 @@ var Vtiger_WSClient = function(url) {
 	/**
 	 * Do Login Operation
 	 */
-	this.doLogin = function(username, accesskey, callback) {
+	this.doLogin = function(username, accesskey, callback, withpassword) {
 		this.__doChallenge(username);
 		if(this._servicetoken == false) {
 			// TODO: Failed to get the service token
@@ -133,12 +133,13 @@ var Vtiger_WSClient = function(url) {
 
 		this._serviceuser = username;
 		this._servicekey  = accesskey;
+		if (withpassword==undefined) withpassword = false;
 
 		var reqtype = 'POST';
 		var postdata = {
 			'operation' : 'login',
 			'username'  : username,
-			'accessKey' : cbMD5(this._servicetoken + accesskey)
+			'accessKey' : (withpassword ? this._servicetoken + accesskey : cbMD5(this._servicetoken + accesskey))
 		};
 		jQuery.ajax({
 			url : this._serviceurl,
