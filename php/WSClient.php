@@ -138,7 +138,7 @@ class Vtiger_WSClient {
 		$postdata = Array(
 			'operation' => 'login',
 			'username'  => $username,
-			'accessKey' => ($withpassword ? $this->_servicetoken + accesskey : md5($this->_servicetoken.$userAccesskey))
+			'accessKey' => ($withpassword ? $this->_servicetoken.$userAccesskey : md5($this->_servicetoken.$userAccesskey))
 		);
 		$resultdata = $this->_client->doPost($postdata, true);
 
