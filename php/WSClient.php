@@ -83,11 +83,11 @@ class Vtiger_WSClient {
 	 * Check if result has any error.
 	 */
 	function hasError($result) {
-		if(isset($result['success']) && $result['success'] === true) {
+		if(is_array($result) && isset($result['success']) && $result['success'] === true) {
 			$this->_lasterror = false;
 			return false;
 		}
-		$this->_lasterror = $result['error'];
+		$this->_lasterror = isset($result['error']) ? $result['error'] : $result;
 		return true;
 	}
 
