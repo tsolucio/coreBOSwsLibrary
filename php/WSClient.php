@@ -301,6 +301,25 @@ class Vtiger_WSClient {
 	}
 
 	/**
+	* Do Delete Operation
+	*/
+	function doDelete($record) {
+		// Perform re-login if required.
+		$this->__checkLogin();
+
+		$postdata = Array(
+			'operation'   => 'delete',
+			'sessionName' => $this->_sessionid,
+			'id'          => $record
+		);
+		$resultdata = $this->_client->doPost($postdata, true);
+		if($this->hasError($resultdata)) {
+			return false;
+		}
+		return $resultdata['result'];
+	}
+
+	/**
 	 * Invoke custom operation
 	 *
 	 * @param String $method Name of the webservice to invoke
