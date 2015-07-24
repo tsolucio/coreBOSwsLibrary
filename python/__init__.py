@@ -9,8 +9,7 @@ __status__ = 'Development'
 __credits__ = []
 
 __all__ = [
-    'example',
-    'json',
-    'WSClient'
+    "v27",
+    "v30"
 ]
 

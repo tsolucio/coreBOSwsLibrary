@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+# -*- coding: utf-8 -*-
 __author__ = 'David Fernández González'
 __license__ = 'GPLv3+'
 __version__ = '0.0.1'
@@ -9,5 +9,8 @@ __status__ = 'Development'
 __credits__ = []
 
 __all__ = [
-    'example'
+    'example1',
+    'json',
+    'WSClient'
 ]
+

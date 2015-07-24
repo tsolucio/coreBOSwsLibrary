@@ -163,7 +163,7 @@ class WSClient:
             raise exception(response)
 
     # Do Login Operation
-    def do_login(self, user_name, user_accesskey):
+    def do_login(self, user_name, user_accesskey , withpassword=False):
         """
         @param user_name:
         @param user_accesskey:
@@ -171,12 +171,11 @@ class WSClient:
         """
         if not self.__do_challenge(user_name):
             return False
-
-        key = md5sum(self.__servicetoken + user_accesskey)
+        
         response = self.__do_post(
             operation='login',
             username=user_name,
-            accessKey=key
+            accessKey=self.__servicetoken + user_accesskey if withpassword else md5sum(self.__servicetoken + user_accesskey)
         )
 
         if response['success']:
