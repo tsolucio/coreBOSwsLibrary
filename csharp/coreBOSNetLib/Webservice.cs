@@ -259,19 +259,18 @@ namespace VtigerWebservice
         /// Do Login Operation
         /// </summary>
         /// <returns></returns>
-        public bool doLogin(string User = "", string AccessKey = "")
+        public bool doLogin(string User = "", string AccessKey = "", bool withpassword = false)
         {
             if (User == "" || AccessKey == "")
                 throw new Exception("User and key incorrect.");
 
             var resChallenge = doChallenge(User);
 			string token = resChallenge["token"] as string;
-			string encodedKey = md5sum(token+AccessKey) as string;
-            	
+
             Dictionary<string, object> loginResponse = doPost(new Dictionary<string, string> {
                     {"operation", "login"}, 
 				    {"username", User}, 
-                    {"accessKey", encodedKey}
+                    {"accessKey", (withpassword ? token+AccessKey : md5sum(token+AccessKey))}
                 }
             ) as Dictionary<string, object>;
             	
