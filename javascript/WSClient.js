@@ -163,6 +163,35 @@ var Vtiger_WSClient = function(url) {
 	};
 
 	/**
+	 * Do Logout Operation
+	 */
+	this.doLogout = function(callback) {
+		this.__checkLogin();
+
+		var reqtype = 'POST';
+		var postdata = {
+			'operation' : 'logout',
+			'sessionName'  : this._sessionid
+		};
+		jQuery.ajax({
+			url : this._serviceurl,
+			type: reqtype,
+			data: postdata,
+			// Pass reference to the client to use it inside callback function.
+			_wsclient : this, 
+			complete : function(res, status) {
+				var usethis = this._wsclient;
+				var resobj = usethis.toJSON(res.responseText);
+				var result = false;
+				if(usethis.hasError(resobj) == false) {
+					result = resobj['result'];
+				}
+				usethis.__performCallback(callback, result);
+			}
+		});
+	};
+
+	/**
 	 * Do Query Operation.
 	 */
 	this.doQuery = function(query, callback) {
