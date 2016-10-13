@@ -1,7 +1,9 @@
 var Vtiger_WSClient = function(url) {
 	this._servicebase = 'webservice.php';
-	// TODO: Format the url before appending servicebase
-	url = url + '/';
+	if (url!='' && url.substr(url.length - 1) != '/') {
+		// Format the url before appending servicebase
+		url = url + '/';
+	}
 
 	this._serviceurl = url + this._servicebase;
 
@@ -190,6 +192,32 @@ var Vtiger_WSClient = function(url) {
 			}
 		});
 	};
+
+	this.extendSession = function(callback){
+		var self = this;
+		var reqtype = 'POST';
+		var postdata = {
+			'operation' : 'extendsession'
+		};
+		jQuery.ajax({
+			url : this._serviceurl,
+			type: reqtype,
+			data: postdata,
+			// Pass reference to the client to use it inside callback function.
+			_wsclient : this,
+			complete : function(res, status) {
+				var usethis = this._wsclient;
+				var resobj = usethis.toJSON(res.responseText);
+				var result = false;
+				if(usethis.hasError(resobj) == false) {
+					self._sessionid = resobj.result['sessionName'];
+					self._userid = resobj.result['userId'];
+					result = resobj['result'];
+				}
+				usethis.__performCallback(callback, result);
+			}
+		});
+	}
 
 	/**
 	 * Do Query Operation.
@@ -503,7 +531,7 @@ var Vtiger_WSClient = function(url) {
  * Return significant message on toString.
  */
 Vtiger_WSClient.prototype.toString = function(){
-	return 	"[coreBOS_WSClient]";
+	return "[coreBOS_WSClient]";
 };
 
 /*******************************************************************************
