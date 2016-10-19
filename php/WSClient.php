@@ -316,6 +316,28 @@ class Vtiger_WSClient {
 		return $resultdata['result'];
 	}
 
+	function doRevise($module, $valuemap) {
+		// Perform re-login if required.
+		$this->__checkLogin();
+
+		// Assign record to logged in user if not specified
+		if(!isset($valuemap['assigned_user_id'])) {
+			$valuemap['assigned_user_id'] = $this->_userid;
+		}
+
+		$postdata = Array(
+			'operation'   => 'revise',
+			'sessionName' => $this->_sessionid,
+			'elementType' => $module,
+			'element'     => json_encode($valuemap)
+		);
+		$resultdata = $this->_client->doPost($postdata, true);
+		if($this->hasError($resultdata)) {
+			return false;
+		}
+		return $resultdata['result'];
+	}
+
 	/**
 	* Do Delete Operation
 	*/
