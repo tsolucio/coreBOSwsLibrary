@@ -1,0 +1,92 @@
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+
+<dom-module id="corebosws-update">
+	<style>
+		:host {
+
+		}
+	</style>
+	<template>
+		<iron-ajax
+		id="_cbwsupdateajax"
+		url="[[coreboswsurl]]"
+		body="[[parametros]]"
+		method="POST"
+		content-type='application/json'
+		handle-as="json"
+		on-response="handleResponse"
+		debounce-duration="300"></iron-ajax>
+	</template>
+	<script>
+		Polymer({
+			is : "corebosws-update",
+			properties : {
+				cburl : {
+					type : String,
+					value : '',
+					notify : true
+				},
+				coreboswsurl : {
+					computed : 'getcbwsurl(cburl)'
+				},
+				sessionholder : {
+					type : String,
+					value : ''
+				},
+				recordinfo : {
+					type : Object,
+					value : {},
+					observer : '_sendCall'
+				},
+				parametros : {
+					type : Object,
+					value : {}
+				},
+				callresponse : {
+					type : Array,
+					value : [],
+					notify : true
+				}
+			},
+			getcbwsurl : function(cburl) {
+				if (cburl=='') {
+					cburl = window.location.href.substr(0,window.location.href.indexOf('index.php')-1);
+				}
+				return cburl + '/webservice.php';
+			},
+			_sendCall : function(newVal, oldVal) {
+				if (newVal == '' || newVal == {} || newVal == undefined || this.sessionholder == '') return false;
+				var cbws_sh = document.getElementById(this.sessionholder);
+				var sessionid = '';
+				var userid = '';
+				if (cbws_sh && cbws_sh.sessionid != '') {
+					sessionid = cbws_sh.sessionid;
+					userid = cbws_sh.userid;
+				} else {
+					var self=this;
+					cbws_sh.addEventListener('corebosws-extended', function (e) {
+						cbws_sh.removeEventListener('corebosws-extended', arguments.callee);
+						self._sendCall(newVal, oldVal);
+					});
+				}
+				if (sessionid=='') return false;
+				if (this.recordinfo.assigned_user_id == undefined || this.recordinfo.assigned_user_id == '') {
+					this.recordinfo.assigned_user_id = userid;
+				}
+				this.parametros = {
+					"sessionName" : sessionid,
+					"operation" : "update",
+					"element" : JSON.stringify(this.recordinfo)
+				};
+				this.$._cbwsupdateajax.generateRequest();
+			},
+			handleResponse : function(data) {
+				this.recordinfo = '';
+				if (data.detail.response != null) {
+					this.callresponse = data.detail.response.result;
+					this.fire('corebosws-updated', data.detail.response.result);
+				}
+			}
+		});
+	</script>
+</dom-module>

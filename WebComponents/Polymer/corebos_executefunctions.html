@@ -1,0 +1,59 @@
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+
+<dom-module id="corebos-executefunctions">
+	<style>
+		:host {
+
+		}
+	</style>
+	<template>
+		<iron-ajax
+		id="_cbwsexecfunctionsajax"
+		url="[[cburl]]"
+		params="[[parametros]]"
+		handle-as="json"
+		on-response="handleResponse"
+		debounce-duration="300"></iron-ajax>
+	</template>
+	<script>
+		Polymer({
+			is : "corebos-executefunctions",
+			properties : {
+				cburl : {
+					type : String,
+					value : ''
+				},
+				functiontocall : {
+					type : String,
+					value : '',
+					observer : '_sendCall'
+				},
+				callresponse : {
+					type : Array,
+					value : [],
+					notify : true
+				},
+				parametros : {
+					type : Object,
+					value : {}
+				}
+			},
+			_sendCall : function(newVal, oldVal) {
+				if (newVal == '' || newVal == {} || newVal == undefined) return false;
+				if (this.functiontocall == '') return false;
+				this.parametros.module = "Utilities";
+				this.parametros.action = "UtilitiesAjax";
+				this.parametros.file = "ExecuteFunctions";
+				this.parametros.functiontocall = this.functiontocall;
+				this.$._cbwsexecfunctionsajax.generateRequest();
+			},
+			handleResponse : function(data) {
+				this.functiontocall = '';
+				if (data.detail.response != null) {
+					this.callresponse = data.detail.response;
+					this.fire('corebos-executedfunction', data.detail.response);
+				}
+			}
+		});
+	</script>
+</dom-module>

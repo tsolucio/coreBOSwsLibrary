@@ -1,0 +1,51 @@
+<link rel="import" href="../corebos_components/corebosws_extend.html">
+<link rel="import" href="../corebos_components/corebosws_query.html">
+<link rel="import" href="../corebos_components/corebosws_create.html">
+<link rel="import" href="../corebos_components/corebosws_retrieve.html">
+<link rel="import" href="../corebos_components/corebosws_update.html">
+<link rel="import" href="../corebos_components/corebosws_revise.html">
+<link rel="import" href="../corebos_components/corebosws_delete.html">
+<link rel="import" href="../corebos_components/corebosws_invoke.html">
+<!--
+TODO:
+ListTypes
+Describe
+SetRelation
+
+<template is="dom-bind">
+<corebosws-extend cburl="http://localhost/dqdevel" id="sesholder"></corebosws-extend>
+<corebosws-query
+ cburl="http://localhost/dqdevel"
+ query="{{query}}"
+ sessionholder="sesholder"
+ callresponse="{{callresponse}}"></corebosws-query>
+<template is="dom-repeat" items="{{callresponse}}">{{item.id}} - {{item.firstname}}</template>
+<input type="text" value="{{query::change}}"/>
+</template>
+
+<template is="dom-bind">
+<corebosws-extend cburl="http://localhost/dqdevel" id="sesholder"></corebosws-extend>
+<corebosws-retrieve cburl="http://localhost/dqdevel" recordid="{{recordid}}" callresponse="{{callresponse}}" sessionholder="sesholder"></corebosws-retrieve>
+<div>{{callresponse.accountname}} - {{callresponse.website}}</div>
+<input type="text" value="{{recordid::change}}"/>
+</template>
+
+<template is="dom-bind">
+<corebosws-extend cburl="http://localhost/dqdevel" id="sesholder"></corebosws-extend>
+<corebosws-update cburl="http://localhost/dqdevel" sessionholder="sesholder" recordinfo='{"id":"11x76", "website":"http://tsolucio.com", "assigned_user_id":"19x1", "accountname":"American Speedy Printing Ctrs"}' callresponse="{{callresponse}}"></corebosws-update>
+<div>{{callresponse}}</div>
+</template>
+
+<template is="dom-bind">
+<corebosws-extend cburl="http://localhost/dqdevel" id="sesholder"></corebosws-extend>
+<corebosws-create cburl="http://localhost/dqdevel" sessionholder="sesholder" recordinfo='{"website":"http://tsolucio.com", "assigned_user_id":"19x1", "accountname":"TSolucio"}' recordtype="Accounts" callresponse="{{callresponse}}"></corebosws-create>
+<div>{{callresponse}}</div>
+</template>
+
+<template is="dom-bind">
+<corebosws-extend cburl="http://localhost/dqdevel" id="sesholder"></corebosws-extend>
+<corebosws-delete cburl="http://localhost/dqdevel" sessionholder="sesholder" recordid="11x30200" callresponse="{{callresponse}}"></corebosws-delete>
+<div>{{callresponse.status}}</div>
+</template>
+
+-->

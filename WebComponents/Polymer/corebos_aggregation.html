@@ -1,0 +1,180 @@
+<!--
+	<corebos-aggregation
+	items="[[callresponse]]"
+	operation='operation specification'
+	></corebos-aggregation>
+
+where 'operation specification' is an object which specifies the operation to calcualte and the column upon which to do it
+	{"operation":"count","column":"NOT USED"}
+	{"operation":"min","column":"importe"}
+	{"operation":"max","column":"importe"}
+	{"operation":"avg","column":"importe"}
+	{"operation":"sum","column":"importe"}
+
+you can bind to the aggregation property to get the value for other components
+
+it will return a <div></div> containing the result which can be styled with the apply variable
+
+	--cbaggregation-style
+
+	for example you can set "display: none;" and use the calculated value somewhere else via binding.
+
+-->
+<dom-module id="corebos-aggregation">
+	<template>
+		<style is="custom-style">
+			.cbaggregation {
+				display : inline;
+				@apply(--cbaggregation-style);
+			}
+		</style>
+		<div class="cbaggregation">{{aggregation}}</div>
+	</template>
+	<script>
+		Polymer({
+			is : "corebos-aggregation",
+			properties : {
+				items : {
+					type : Array,
+					value : [],
+					observer : '_doCalculations'
+				},
+				operation : {
+					type : Object,
+					value : {},
+					observer : '_doCalculations'
+				},
+				decimalplaces : {
+					type: Number,
+					value: 2
+				},
+				aggregation : {
+					type : Number,
+					value : 0,
+					notify : true
+				},
+				exception : {
+					type: Object,
+					value: {}
+				}
+			},
+			observers: [
+				'doRefresh(items.*)'
+			],
+			_doCalculations : function(newVal, oldVal) {
+				if (newVal=='' || this.items == undefined || this.items.length == 0 || this.operation == undefined || this.operation == {}) {
+					this.aggregation = 0;
+					return false;
+				}
+				var self = this;
+				this.debounce('doCalcs', function () {
+					self._doAggregations();
+				}, 30);
+			},
+			_doAggregations : function() {
+				var agg = 0;
+				switch(this.operation.operation) {
+					case 'count':
+						agg = this.items.length;
+					break;
+					case 'sum':
+						var sum = 0;
+						if(JSON.stringify(this.exception) === '{}'){
+							for (t = 0; t < this.items.length; ++t) {
+								if (!isNaN(this.items[t][this.operation.column])) {
+									sum = sum + parseFloat(this.items[t][this.operation.column]);
+								}
+							}
+						}else{
+							switch(this.exception.operation) {
+								case '':
+								case '==':
+									for (t = 0; t < this.items.length; ++t) {
+										if (!isNaN(this.items[t][this.operation.column]) && (this.items[t][this.exception.column] == this.exception.value)) {
+											sum = sum + parseFloat(this.items[t][this.operation.column]);
+										}
+									}
+								break;
+								case '!=':
+									for (t = 0; t < this.items.length; ++t) {
+										if (!isNaN(this.items[t][this.operation.column]) && (this.items[t][this.exception.column] != this.exception.value)) {
+											sum = sum + parseFloat(this.items[t][this.operation.column]);
+										}
+									}
+								break;
+								case '>=':
+									for (t = 0; t < this.items.length; ++t) {
+										if (!isNaN(this.items[t][this.operation.column]) && (this.items[t][this.exception.column] >= this.exception.value)) {
+											sum = sum + parseFloat(this.items[t][this.operation.column]);
+										}
+									}
+								break;
+								case '<=':
+									for (t = 0; t < this.items.length; ++t) {
+										if (!isNaN(this.items[t][this.operation.column]) && (this.items[t][this.exception.column] <= this.exception.value)) {
+											sum = sum + parseFloat(this.items[t][this.operation.column]);
+										}
+									}
+								break;
+								case '>':
+									for (t = 0; t < this.items.length; ++t) {
+										if (!isNaN(this.items[t][this.operation.column]) && (this.items[t][this.exception.column] > this.exception.value)) {
+											sum = sum + parseFloat(this.items[t][this.operation.column]);
+										}
+									}
+								break;
+								case '<':
+									for (t = 0; t < this.items.length; ++t) {
+										if (!isNaN(this.items[t][this.operation.column]) && (this.items[t][this.exception.column] < this.exception.value)) {
+											sum = sum + parseFloat(this.items[t][this.operation.column]);
+										}
+									}
+								break;
+							}
+						}
+						agg = sum;
+					break;
+					case 'avg':
+						var sum = 0;
+						for (t = 0; t < this.items.length; ++t) {
+							if (!isNaN(this.items[t][this.operation.column])) {
+								sum = sum + parseFloat(this.items[t][this.operation.column]);
+							}
+						}
+						var avg = sum / this.items.length;
+						agg = avg;
+					break;
+					case 'min':
+						var nums = [];
+						for (t = 0; t < this.items.length; ++t) {
+							if (!isNaN(this.items[t][this.operation.column])) {
+								nums.push(this.items[t][this.operation.column]);
+							}
+						}
+						var min = Math.min.apply(null, nums);
+						agg = min;
+					break;
+					case 'max':
+						var nums = [];
+						for (t = 0; t < this.items.length; ++t) {
+							if (!isNaN(this.items[t][this.operation.column])) {
+								nums.push(this.items[t][this.operation.column]);
+							}
+						}
+						var max = Math.max.apply(null, nums);
+						agg = max;
+					break;
+				}
+				agg = Number(Math.round(agg+'e'+this.decimalplaces)+'e-'+this.decimalplaces);
+				this.aggregation = sprintf("%."+this.decimalplaces+"f", agg);
+			},
+			doRefresh : function(){
+				if (this.items == undefined || this.items.length == 0 || this.operation == undefined || this.operation == {}) {
+					this.aggregation = 0;
+					return false;
+				}
+				this._doAggregations();
+			}
+		});
+	</script>
+</dom-module>

@@ -1,0 +1,96 @@
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+
+<dom-module id="corebosws-query" attributes="cburl query">
+	<style>
+		:host {
+
+		}
+	</style>
+	<template>
+		<iron-ajax
+		id="cbwsqueryajax"
+		url="[[coreboswsurl]]"
+		params="[[parametros]]"
+		method="get"
+		handle-as="json"
+		on-response="handleResponse"
+		debounce-duration="300"></iron-ajax>
+	</template>
+	<script>
+		Polymer({
+			is : "corebosws-query",
+			properties : {
+				cburl : {
+					type : String,
+					value : '',
+					notify : true
+				},
+				coreboswsurl : {
+					computed : 'getcbwsurl(cburl)'
+				},
+				sessionholder : {
+					type : String,
+					value : ''
+				},
+				query : {
+					type : String,
+					value : '',
+					observer : '_sendCall'
+				},
+				parametros : {
+					type : Object,
+					value : {}
+				},
+				callresponse : {
+					type : Array,
+					value : [],
+					notify : true
+				}
+			},
+			getcbwsurl : function(cburl) {
+				if (cburl=='') {
+					cburl = window.location.href.substr(0,window.location.href.indexOf('index.php')-1);
+				}
+				return cburl + '/webservice.php';
+			},
+			_sendCall : function(newVal, oldVal) {
+				if (newVal == '' || newVal == {} || newVal == undefined || this.query == '' || this.sessionholder == '') return false;
+				var cbws_sh = document.getElementById(this.sessionholder);
+				var sessionid = '';
+				var userid = '';
+				if (cbws_sh && cbws_sh.sessionid != '') {
+					sessionid = cbws_sh.sessionid;
+					userid = cbws_sh.userid;
+				} else {
+					var self=this;
+					cbws_sh.addEventListener('corebosws-extended', function (e) {
+						cbws_sh.removeEventListener('corebosws-extended', arguments.callee);
+						self._sendCall(newVal, oldVal);
+					});
+				}
+				if (sessionid=='') return false;
+				this.parametros = {
+					"sessionName" : sessionid,
+					"operation" : "query",
+					"query" : this.query
+				};
+				this.$.cbwsqueryajax.generateRequest();
+			},
+			handleResponse : function(data) {
+				if (data.detail.response != null) {
+					this.callresponse = data.detail.response.result;
+					this.fire('corebosws-queried', data.detail.response.result);
+				} else {
+					this.callresponse = [];
+					this.fire('corebosws-query-error', data);
+				}
+			},
+			doRefresh : function() {
+				var self = this;
+				this.debounce('doCalcs', function () {
+					self.$.cbwsqueryajax.generateRequest();
+				}, 300);
+			}
+		});
+	</script>
+</dom-module>

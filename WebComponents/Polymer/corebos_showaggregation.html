@@ -1,0 +1,96 @@
+<!--
+	<corebos-showaggregation
+	items="[[callresponse]]"
+	operation='operation specification'
+	label='Label'
+	position='top'
+	></corebos-showaggregation>
+
+where 'operation specification' is an object which specifies the operation to calcualte and the column upon which to do it
+	{"operation":"count","column":"NOT USED"}
+	{"operation":"min","column":"importe"}
+	{"operation":"max","column":"importe"}
+	{"operation":"avg","column":"importe"}
+	{"operation":"sum","column":"importe"}
+
+you can bind to the aggregation property to get the value for other components
+
+it will return a <div></div> containing two divs, one is the label and the other is the result which can be styled with the apply variable
+
+	--cbaggregation-style
+	--cbaggregationlabel-style
+
+-->
+<link rel="import" href="../corebos_components/corebos_aggregation.html">
+<dom-module id="corebos-showaggregation">
+	<template>
+		<style is="custom-style">
+			.cbaggregation {
+				display : inline;
+				@apply(--cbaggregation-style);
+			}
+			.cbaggregationlabel {
+				@apply(--cbaggregationlabel-style);
+			}
+		</style>
+		<div class$="{{_showcbaggr}}">
+			<div class="cbaggregationlabel">
+				[[label]]
+			</div>
+			<corebos-aggregation
+				items="[[items]]"
+				operation='[[operation]]'
+				aggregation="{{aggregation}}"
+				decimalplaces="[[decimalplaces]]"
+			></corebos-aggregation>
+		</div>
+	</template>
+	<script>
+		Polymer({
+			is : "corebos-showaggregation",
+			properties : {
+				items : {
+					type : Array,
+					value : []
+				},
+				operation : {
+					type : Object,
+					value : {}
+				},
+				aggregation : {
+					type : Number,
+					value : 0,
+					notify : true
+				},
+				decimalplaces : {
+					type: Number,
+					value: 2
+				},
+				label : {
+					type : String,
+					value : ''
+				},
+				position : {
+					type : String,
+					value : '',
+					observer : '_changePosition'
+				},
+				_showcbaggr : {
+					type : String,
+					value : ''
+				}
+			},
+			_changePosition : function(newVal, oldVal) {
+				switch (newVal) {
+					case 'top':
+						this._showcbaggr = 'layout vertical';
+						break;
+					case 'left':
+					default:
+						this._showcbaggr = 'layout horizontal';
+						break;
+				}
+			}
+		});
+	</script>
+</dom-module>

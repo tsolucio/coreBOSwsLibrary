@@ -1,0 +1,70 @@
+<!--
+	Component to execute generic javascript calculations.
+	Insipired by the work at https://github.com/liuwenchao/aha-programable (thanks!)
+	set the calculation property to the javascript you want to execute
+	you can use databinding like this:
+
+	<corebos-jscalculate calculation="Math.round(({{dqlinestotal}}*{{descuento}}/100)*100)/100"></corebos-jscalculate>
+
+	you will get the result in a span which you can style with the variable --jscalculate-style
+
+	and you can bind to the result property to use the calcualtion in other components
+
+	this component has a set of internal helper functions for operations which you can use:
+
+	cbjs_roundto(val,decimals): rounds a number to the given number of decimals
+
+-->
+<dom-module id="corebos-jscalculate">
+
+	<style>
+		#maincalculation {
+			@apply(--cbcalculation-style);
+		}
+	</style>
+	<template>
+		<span id="maincalculation">{{result}}</span>
+	</template>
+
+</dom-module>
+<script>
+	function cbjs_roundto(value,decimals) {
+		// http://www.jacklmoore.com/notes/rounding-in-javascript
+		return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
+	}
+	Polymer({
+		is : 'corebos-jscalculate',
+		properties : {
+			calculation : {
+				type : String,
+				value : '',
+				notify : true,
+				observer : 'valueChanged'
+			},
+			result : {
+				type : Number,
+				value : 0,
+				notify : true
+			},
+			debug : {
+				type: Boolean,
+				value: false
+			}
+		},
+		valueChanged : function() {
+			var self = this;
+			this.debounce('doCalc', function () {
+				self._doCalc();
+			}, 30);
+		},
+		_doCalc : function() {
+			var result = '';
+			try {
+				var result = new Function('return '+ this.calculation)();
+			} catch(e) {
+				if (this.debug) console.error('failed to evaluate: ' + this.calculation);
+			}
+			this.result = result;
+		}
+	});
+</script>

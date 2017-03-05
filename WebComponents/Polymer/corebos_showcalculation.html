@@ -1,0 +1,101 @@
+<!--
+	<corebos-showcalculation
+	operation='operation specification'
+	label='Label'
+	position='top'
+	></corebos-showcalculation>
+
+you can bind to the result property to get the value for other components
+
+it will return a <div></div> containing two divs, one is the label and the other is the result which can be styled with the apply variable
+
+	--cbcalculation-style
+	--cbcalculationlabel-style
+
+-->
+<link rel="import" href="../corebos_components/corebos_jscalculate.html">
+<dom-module id="corebos-showcalculation">
+	<template>
+		<style is="custom-style">
+			.cbcalculation {
+				display : inline;
+				@apply(--cbcalculation-style);
+			}
+			.cbcalculationlabel {
+				@apply(--cbcalculationlabel-style);
+			}
+			.cbcalculation-negative {
+				background-color: #fcf8e3;
+				border-color: #faebcc;
+				color: #8a6d3b;
+				@apply(--cbcalculation-negative-style);
+			}
+			.cbcalculation-positive {
+				background-color: #dff0d8;
+				border-color: #d6e9c6;
+				color: #3c763d;
+				@apply(--cbcalculation-positive-style);
+			}
+		</style>
+		<div class$="{{_showcbaggr}} {{_cnegativepositive}}">
+			<div class$="cbcalculationlabel {{_cnegativepositive}}">[[label]]</div>
+			<corebos-jscalculate
+				class$=" {{_cnegativepositive}}"
+				calculation="[[calculation]]"
+				result="{{result}}"
+			></corebos-jscalculate>
+		</div>
+	</template>
+	<script>
+		Polymer({
+			is : "corebos-showcalculation",
+			properties : {
+				calculation : {
+					type : String,
+					value : ''
+				},
+				result : {
+					type : Number,
+					value : 0,
+					notify : true,
+					observer : '_changeResult'
+				},
+				label : {
+					type : String,
+					value : ''
+				},
+				position : {
+					type : String,
+					value : '',
+					observer : '_changePosition'
+				},
+				_showcbaggr : {
+					type : String,
+					value : ''
+				},
+				_cnegativepositive : {
+					type : String,
+					value : ''
+				}
+			},
+			_changeResult : function(newVal, oldVal) {
+				if (newVal>=0) {
+					this._cnegativepositive = 'cbcalculation-positive';
+				}else{
+					this._cnegativepositive = 'cbcalculation-negative';
+				}
+			},
+			_changePosition : function(newVal, oldVal) {
+				switch (newVal) {
+					case 'top':
+						this._showcbaggr = 'layout vertical';
+						break;
+					case 'left':
+					default:
+						this._showcbaggr = 'layout horizontal';
+						break;
+				}
+			}
+		});
+	</script>
+</dom-module>

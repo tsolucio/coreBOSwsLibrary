@@ -1,0 +1,108 @@
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+
+<dom-module id="corebosws-invoke">
+	<style>
+		:host {
+		}
+	</style>
+	<template>
+		<iron-ajax
+		id="_cbwsinvokeajax"
+		url="[[coreboswsurl]]"
+		method="[[method]]"
+		handle-as="json"
+		on-response="handleResponse"
+		debounce-duration="300"></iron-ajax>
+	</template>
+	<script>
+		Polymer({
+			is : "corebosws-invoke",
+			properties : {
+				cburl : {
+					type : String,
+					value : ''
+				},
+				coreboswsurl : {
+					computed : 'getcbwsurl(cburl)'
+				},
+				sessionholder : {
+					type : String,
+					value : ''
+				},
+				method : {
+					type : String,
+					value : 'GET'
+				},
+				operation : {
+					type : String,
+					value : '',
+					observer : '_sendCall'
+				},
+				donotreset : {
+					type : Boolean,
+					value : false
+				},
+				params : {
+					type : Object,
+					value : '',
+					observer : '_sendCall'
+				},
+				invokeresponse : {
+					type : Array,
+					value : [],
+					notify : true
+				}
+			},
+			getcbwsurl : function(cburl) {
+				if (cburl=='') {
+					cburl = window.location.href.substr(0,window.location.href.indexOf('index.php')-1);
+				}
+				return cburl + '/webservice.php';
+			},
+			_sendCall : function(newVal, oldVal) {
+				if (this.operation == '' || this.sessionholder == '') return false;
+				if (this.params == undefined || this.params == '') return false;
+				var cbws_sh = document.getElementById(this.sessionholder);
+				var sessionid = '';
+				var userid = '';
+				if (cbws_sh && cbws_sh.sessionid != '') {
+					sessionid = cbws_sh.sessionid;
+					userid = cbws_sh.userid;
+				} else {
+					var self=this;
+					cbws_sh.addEventListener('corebosws-extended', function (e) {
+						cbws_sh.removeEventListener('corebosws-extended', arguments.callee);
+						self._sendCall(newVal, oldVal);
+					});
+				}
+				if (sessionid=='') return false;
+				if ( typeof this.params == 'string') {
+					var prms = JSON.parse(this.params);
+				} else {
+					var prms = this.params;
+				}
+				prms.sessionName = sessionid;
+				prms.operation = this.operation;
+				if (this.method.toLowerCase()=='get') {
+					this.$._cbwsinvokeajax.params=prms;
+				} else {
+					this.$._cbwsinvokeajax.body=prms;
+					this.$._cbwsinvokeajax.contentType='application/json';
+				}
+				this.$._cbwsinvokeajax.generateRequest();
+			},
+			handleResponse : function(data) {
+				if (!this.donotreset) {
+					this.operation = '';
+				}
+				if (data.detail.response != null) {
+					this.invokeresponse = data.detail.response.result;
+					this.fire('corebosws-invoked', data.detail.response.result);
+				}
+			},
+			attached : function() {
+				this._sendCall('','');
+			}
+		});
+	</script>
+</dom-module>

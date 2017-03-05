@@ -1,0 +1,68 @@
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+
+<dom-module id="corebos-masterdetail">
+	<style>
+		:host {
+		}
+	</style>
+	<template>
+		<iron-ajax
+		id="_cbwsmdajax"
+		url="[[cburl]]"
+		params="{{params}}"
+		handle-as="json"
+		on-response="handleResponse"
+		debounce-duration="300"></iron-ajax>
+	</template>
+	<script>
+		Polymer({
+			is : "corebos-masterdetail",
+			properties : {
+				cburl : {
+					type : String
+				},
+				functiontocall : {
+					type : String,
+					value : '',
+					notify : true,
+					observer : '_sendCall'
+				},
+				params : {
+					type : Object,
+					value : {}
+				},
+				callresponse : {
+					type : Array,
+					value : [],
+					notify : true
+				}
+			},
+			_sendCall : function(newVal, oldVal) {
+				if (newVal == '')
+					return {};
+				if ( typeof this.params == 'string') {
+					this.params = JSON.parse(this.params);
+				}
+				this.params.module = "Utilities";
+				this.params.action = "UtilitiesAjax";
+				this.params.file = "MasterDetailFunctions";
+				this.params.functiontocall = newVal;
+				this.$._cbwsmdajax.generateRequest();
+			},
+			callresponse : '',
+			handleResponse : function(data) {
+				this.functiontocall = '';
+				if (data.detail.response==null || data.detail.response==undefined) {
+					this.callresponse = [];
+					this.fire('corebosmd-done', null);
+				} else {
+					this.callresponse = data.detail.response;
+					this.fire('corebosmd-done', data.detail.response.result);
+				}
+				if (this.params.whotorefresh != undefined && this.params.whotorefresh != '') {
+					cbmd_dorefresh(this.params.whotorefresh)
+				}
+			}
+		});
+	</script>
+</dom-module>

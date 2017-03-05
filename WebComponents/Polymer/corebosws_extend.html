@@ -1,0 +1,64 @@
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+
+<dom-module id="corebosws-extend">
+	<style>
+		:host {
+		}
+	</style>
+	<template>
+		<iron-ajax
+		id="_cbwsextendajax"
+		url="[[coreboswsurl]]"
+		method="POST"
+		content-type='application/json'
+		handle-as="json"
+		on-response="handleResponse"
+		debounce-duration="300"></iron-ajax>
+	</template>
+	<script>
+		Polymer({
+			is : "corebosws-extend",
+			properties : {
+				cburl : {
+					type : String,
+					value : ''
+				},
+				coreboswsurl : {
+					computed : 'getcbwsurl(cburl)'
+				},
+				userid : {
+					type : String,
+					value : '',
+					notify : true
+				},
+				sessionid : {
+					type : String,
+					value : '',
+					notify : true
+				}
+			},
+			getcbwsurl : function(cburl) {
+				if (cburl=='') {
+					cburl = window.location.href.substr(0,window.location.href.indexOf('index.php')-1);
+				}
+				return cburl + '/webservice.php';
+			},
+			handleResponse : function(data) {
+				if (data.detail.response != null) {
+					this.sessionid = data.detail.response.result.sessionName;
+					this.userid = data.detail.response.result.userId;
+					this.fire('corebosws-extended', data.detail.response);
+				} else {
+					console.error('login failed!');
+					this.sessionid = '';
+					this.userid = '';
+					this.fire('corebosws-extended-error', data);
+				}
+			},
+			ready : function() {
+				this.$._cbwsextendajax.body = { operation : 'extendsession' };
+				this.$._cbwsextendajax.generateRequest();
+			}
+		});
+	</script>
+</dom-module>
