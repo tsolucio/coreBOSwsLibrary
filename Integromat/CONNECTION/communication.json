@@ -1,0 +1,40 @@
+[{
+    "qs": {
+      "username": "{{parameters.username}}",
+      "operation": "getchallenge"
+    },
+    "url": "{{parameters.corebosurl}}/webservice.php",
+    "method": "GET",
+    "response": {
+      "temp": {
+        "token": "{{body.result.token}}{{parameters.accesskey}}"
+      },
+      "error": {
+        "type": "InvalidConfigurationError",
+        "message": "{{body.error.message}}"
+      },
+      "valid": "{{body.success}}"
+    }
+  },
+  {
+    "url": "{{parameters.corebosurl}}/webservice.php",
+    "body": {
+      "username": "{{parameters.username}}",
+      "accessKey": "{{md5(temp.token)}}",
+      "operation": "login"
+    },
+    "method": "POST",
+    "response": {
+      "data": {
+        "userID": "{{body.result.userId}}",
+        "sessionName": "{{body.result.sessionName}}"
+      },
+      "type": "json",
+      "error": {
+        "type": "InvalidConfigurationError",
+        "message": "{{body.error.message}}"
+      },
+      "valid": "{{body.success}}"
+    }
+  }
+]

@@ -1,0 +1,30 @@
+[{
+		"qs": {
+			"operation": "describe",
+			"elementType": "{{parameters.elementType}}",
+			"sessionName": "{{connection.sessionName}}"
+		},
+		"url": "{{parameters.corebosurl}}/webservice.php",
+		"method": "GET",
+		"response": {
+			"temp": {
+				"idPrefix": "{{body.result.idPrefix}}"
+			}
+		}
+	},
+	{
+		"qs": {
+			"operation": "SetRelation",
+			"sessionName": "{{connection.sessionName}}",
+			"relate_this_id": "{{temp.idPrefix}}x{{parameters.objectid}}",
+			"with_these_ids": "{{toJSON(parameters.torealtearray)}}"
+		},
+		"url": "{{parameters.corebosurl}}/webservice.php",
+		"method": "GET",
+		"response": {
+			"output": {
+				"status": "{{body.result}}"
+			}
+		}
+	}
+]

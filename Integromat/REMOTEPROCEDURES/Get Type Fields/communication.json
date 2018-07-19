@@ -1,0 +1,13 @@
+{
+	"qs": {
+		"operation": "describe",
+		"elementType": "{{parameters.elementType}}",
+		"sessionName": "{{connection.sessionName}}"
+	},
+	"url": "{{parameters.corebosurl}}/webservice.php",
+	"method": "GET",
+	"response": {
+		"output": "{{transformTypeFields(item)}}",
+		"iterate": "{{body.result.fields}}"
+	}
+}

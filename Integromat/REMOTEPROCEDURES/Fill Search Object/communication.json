@@ -1,0 +1,11 @@
+{
+  "qs": {
+    "operation": "listtypes",
+    "sessionName": "{{connection.sessionName}}"
+  },
+  "url": "{{parameters.corebosurl}}/webservice.php",
+  "method": "GET",
+  "response": {
+    "output": "{{transformFillSearchObject(body.result.types)}}"
+  }
+}

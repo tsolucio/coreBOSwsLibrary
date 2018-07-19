@@ -1,0 +1,21 @@
+[{
+    "help": "The URL where coreBOS CRM is hosted.",
+    "name": "corebosurl",
+    "type": "text",
+    "label": "coreBOS URL",
+    "required": true
+  },
+  {
+    "name": "username",
+    "type": "text",
+    "label": "User name",
+    "required": true
+  },
+  {
+    "help": "You can get your access key in My Preferences in coreBOS.",
+    "name": "accesskey",
+    "type": "text",
+    "label": "Access key",
+    "required": true
+  }
+]

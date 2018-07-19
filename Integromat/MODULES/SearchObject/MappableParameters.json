@@ -1,0 +1,71 @@
+[{
+  "name": "elementType",
+  "type": "select",
+  "label": "Element type",
+  "options": {
+    "store": "rpc://RpcListTypes",
+    "nested": [{
+      "name": "filter",
+      "label": "Filter",
+      "type": "filter",
+      "options": {
+        "store": "rpc://SearchObject",
+        "operators": [{
+            "label": "Text",
+            "options": [{
+                "label": "Equals",
+                "value": "text:equals"
+              },
+              {
+                "label": "Not equals",
+                "value": "text:notEquals"
+              },
+              {
+                "label": "Starts with",
+                "value": "text:startsWith"
+              },
+              {
+                "label": "Ends with",
+                "value": "text:endsWith"
+              },
+              {
+                "label": "Contains",
+                "value": "text:contains"
+              }
+            ]
+          },
+          {
+            "label": "Number",
+            "options": [{
+                "label": "Equals",
+                "value": "number:eq"
+              },
+              {
+                "label": "Less then",
+                "value": "number:lt"
+              },
+              {
+                "label": "Greater then",
+                "value": "number:gt"
+              },
+              {
+                "label": "Greater then or equal",
+                "value": "number:gte"
+              },
+              {
+                "label": "Less then or equal",
+                "value": "number:lte"
+              },
+              {
+                "label": "Not equal",
+                "value": "number:ne"
+              }
+            ]
+          }
+        ]
+      }
+    }]
+  },
+  "editable": true,
+  "required": true
+}]

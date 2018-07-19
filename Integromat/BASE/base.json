@@ -1,0 +1,16 @@
+{
+	"qs": {
+		"sessionName": "{{connection.sessionName}}"
+	},
+	"baseUrl": "{{connection.corebosurl}}/webservice.php",
+	"response": {
+		"error": {
+			"404": {
+				"type": "DataError",
+				"message": "[{{body.error.code}}] {{body.error.message}}"
+			},
+			"message": "[{{body.error.code}}] {{body.error.message}}"
+		},
+		"valid": "{{body.success}}"
+	}
+}

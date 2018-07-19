@@ -1,0 +1,22 @@
+[{
+	"name": "elementType",
+	"type": "select",
+	"label": "Element type",
+	"options": {
+		"store": "rpc://RpcListTypes",
+		"nested": [{
+			"help": "Record Id",
+			"name": "recordid",
+			"type": "number",
+			"label": "Record Id",
+			"nested": [
+				"rpc://RpcGetTypeFields"
+			],
+			"options": "rpc://RpcGetTypeFields",
+			"advanced": false,
+			"required": true
+		}]
+	},
+	"editable": true,
+	"required": true
+}]

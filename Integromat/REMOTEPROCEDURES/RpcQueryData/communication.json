@@ -1,0 +1,31 @@
+[{
+		"qs": {
+			"module": "{{parameters.searchModule}}",
+			"operation": "getfilterfields",
+			"sessionName": "{{connection.sessionName}}"
+		},
+		"url": "{{parameters.corebosurl}}/webservice.php",
+		"method": "POST",
+		"response": {
+			"temp": {
+				"fields": "{{body.result.linkfields}}"
+			}
+		}
+	},
+	{
+		"qs": {
+			"query": "SELECT id, {{temp.fields}} FROM {{parameters.searchModule}};",
+			"operation": "query",
+			"sessionName": "{{connection.sessionName}}"
+		},
+		"url": "{{parameters.corebosurl}}/webservice.php",
+		"method": "GET",
+		"response": {
+			"output": {
+				"label": "{{tranformQueryData(item)}}",
+				"value": "{{item.id}}"
+			},
+			"iterate": "{{body.result}}"
+		}
+	}
+]
