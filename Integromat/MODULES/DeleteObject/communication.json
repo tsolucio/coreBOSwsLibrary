@@ -1,0 +1,27 @@
+[{
+		"qs": {
+			"operation": "describe",
+			"elementType": "{{parameters.elementType}}",
+			"sessionName": "{{connection.sessionName}}"
+		},
+		"url": "{{parameters.corebosurl}}/webservice.php",
+		"method": "GET",
+		"response": {
+			"temp": {
+				"idPrefix": "{{body.result.idPrefix}}"
+			}
+		}
+	},
+	{
+		"qs": {
+			"id": "{{temp.idPrefix}}x{{parameters.recordid}}",
+			"operation": "delete",
+			"sessionName": "{{connection.sessionName}}"
+		},
+		"url": "{{parameters.corebosurl}}/webservice.php",
+		"method": "POST",
+		"response": {
+			"status": "{{body.result.status}}"
+		}
+	}
+]

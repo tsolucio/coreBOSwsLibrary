@@ -1,0 +1,13 @@
+[{
+	"name": "elementType",
+	"type": "select",
+	"label": "Element type",
+	"options": {
+		"store": "rpc://RpcListTypes",
+		"nested": [
+			"rpc://rpcGetFieldToUpdate"
+		]
+	},
+	"editable": true,
+	"required": true
+}]

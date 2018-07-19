@@ -1,0 +1,15 @@
+{
+  "qs": {
+    "operation": "listtypes",
+    "sessionName": "{{connection.sessionName}}"
+  },
+  "url": "http://demo.corebos.com/webservice.php",
+  "method": "GET",
+  "response": {
+    "output": {
+      "label": "{{item}}",
+      "value": "{{item}}"
+    },
+    "iterate": "{{body.result.types}}"
+  }
+}

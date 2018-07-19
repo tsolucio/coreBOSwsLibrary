@@ -1,0 +1,12 @@
+{
+	"qs": {
+		"query": "{{transformFilterInput(parameters.filter, parameters.elementType)}}",
+		"operation": "query",
+		"sessionName": "{{connection.sessionName}}"
+	},
+	"url": "{{parameters.corebosurl}}/webservice.php",
+	"method": "POST",
+	"response": {
+		"output": "{{body.result}}"
+	}
+}

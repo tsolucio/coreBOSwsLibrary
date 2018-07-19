@@ -1,0 +1,17 @@
+[{
+  "name": "elementType",
+  "type": "select",
+  "label": "Element type",
+  "options": {
+    "store": "rpc://RpcListTypes",
+    "nested": [{
+        "name": "objectid",
+        "type": "number",
+        "label": "Record Id"
+      },
+      "rpc://fillSearchObject"
+    ]
+  },
+  "editable": true,
+  "required": true
+}]
