@@ -5,7 +5,7 @@ cbwsclib - coreBOS Web service client Library
 
 You can find additional information on the usage of the libraries in the [coreBOS documentation wiki](http://corebos.org/documentation) and tests and examples in the [coreBOS Webservice Development tool](https://github.com/tsolucio/coreBOSwsDevelopment).
 
-The *coreBOS* team is actively maintaining the PHP, (pure) Javascript and AngularJS versions of the library.
+The *coreBOS* team is actively maintaining the PHP, (vanilla) Javascript, Integromat and Go versions of the library.
 
 David Fernández (kapsule) is maintaining the python, .NET (csharp) and Qt versions at [kapsule/coreBOSwsLibrary](https://github.com/kapsule/coreBOSwsLibrary) while they are being kept in sync here for easy access. *Thank you* David
 
