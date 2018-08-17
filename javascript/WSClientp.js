@@ -100,51 +100,51 @@ var cbWSClient = function (url) {
 	/**
 	 * Login Operation
 	 */
-  this.doLogin = function (username, accesskey, withpassword) {
-    // reqtype = 'POST';
-    this._serviceuser = username;
-    this._servicekey = accesskey;
-    if (withpassword == undefined) {
-      withpassword = false;
-    }
-    let myself = this;
+	this.doLogin = function (username, accesskey, withpassword) {
+		// reqtype = 'POST';
+		this._serviceuser = username;
+		this._servicekey = accesskey;
+		if (withpassword == undefined) {
+			withpassword = false;
+		}
+		let myself = this;
 
-    return new Promise((resolve, reject) => {
-      this.__doChallenge(username)
-        .then(function (data) {
-          if (myself.hasError(data) == false) {
-            let result = data['result'];
-            myself._servicetoken = result.token;
-            myself._servertime = result.serverTime;
-            myself._expiretime = result.expireTime;
-            myself.fetchOptions.method = 'post';
-            let postdata = 'operation=login&username=' + username;
-            postdata +=
+		return new Promise((resolve, reject) => {
+			this.__doChallenge(username)
+				.then(function (data) {
+					if (myself.hasError(data) == false) {
+						let result = data['result'];
+						myself._servicetoken = result.token;
+						myself._servertime = result.serverTime;
+						myself._expiretime = result.expireTime;
+						myself.fetchOptions.method = 'post';
+						let postdata = 'operation=login&username=' + username;
+						postdata +=
               '&accessKey=' +
               (withpassword
                 ? myself._servicetoken + accesskey
                 : cbMD5(myself._servicetoken + accesskey));
-            myself.fetchOptions.body = postdata;
+						myself.fetchOptions.body = postdata;
 
-            fetch(myself._serviceurl, myself.fetchOptions)
-              .then(myself.status)
-              .then(myself.getData)
-              .then(logindata => {
-                if (myself.hasError(logindata) == false) {
-                  var result = logindata['result'];
-                  myself._sessionid = result.sessionName;
-                  myself._userid = result.userId;
-                  resolve(logindata);
-                } else {
-                  reject(new Error('incorrect response: ' + myself.lastError()));
-                }
-              })
-              .catch(error => reject(error));
-          } else {
-            reject(new Error('incorrect response: ' + myself.lastError()));
-          }
-        })
-        .catch(error => reject(error));
+						fetch(myself._serviceurl, myself.fetchOptions)
+							.then(myself.status)
+							.then(myself.getData)
+							.then(logindata => {
+								if (myself.hasError(logindata) == false) {
+									var result = logindata['result'];
+									myself._sessionid = result.sessionName;
+									myself._userid = result.userId;
+									resolve(logindata);
+								} else {
+									reject(new Error('incorrect response: ' + myself.lastError()));
+								}
+							})
+							.catch(error => reject(error));
+					} else {
+						reject(new Error('incorrect response: ' + myself.lastError()));
+					}
+				})
+				.catch(error => reject(error));
     });
   };
 
