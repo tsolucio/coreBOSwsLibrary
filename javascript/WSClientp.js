@@ -119,11 +119,7 @@ var cbWSClient = function (url) {
 						myself._expiretime = result.expireTime;
 						myself.fetchOptions.method = 'post';
 						let postdata = 'operation=login&username=' + username;
-						postdata +=
-              '&accessKey=' +
-              (withpassword
-                ? myself._servicetoken + accesskey
-                : cbMD5(myself._servicetoken + accesskey));
+						postdata += '&accessKey=' + (withpassword ? myself._servicetoken + accesskey : cbMD5(myself._servicetoken + accesskey));
 						myself.fetchOptions.body = postdata;
 
 						fetch(myself._serviceurl, myself.fetchOptions)
@@ -145,8 +141,8 @@ var cbWSClient = function (url) {
 					}
 				})
 				.catch(error => reject(error));
-    });
-  };
+		});
+	};
 
 	/**
 	 * Logout Operation
