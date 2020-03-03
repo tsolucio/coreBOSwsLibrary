@@ -1,0 +1,26 @@
+{
+  "name": "corebos-ws-lib",
+  "version": "1.0.0",
+  "description": "CoreBOS Web service client Library",
+  "main": "WSClientp.min.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "CoreBOS",
+    "CRM",
+    "tsolucio",
+    "core",
+    "Business",
+    "Operating",
+    "System"
+  ],
+  "author": "Joe Bordes <joe@tsolucio.com>",
+  "license": "ISC",
+  "dependencies": {
+    "node-fetch": "^2.6.0"
+  },
+  "devDependencies": {
+    "babel-minify": "^0.5.1"
+  }
+}
