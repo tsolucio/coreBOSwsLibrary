@@ -1,2 +1,3 @@
 - **WSClient.js** is a callback based version of the library
 - **WSClientp.js** is a promise/fetch based version of the library (**recommended**)
+- **WSClientm.js** is a promise/fetch based ES6 modoule version of the library (**recommended**)
