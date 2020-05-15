@@ -28,9 +28,9 @@ var fetchOptions = {
 };
 
 export function setURL(cburl) {
-	if (cburl!=='' && cburl.substr(cburl.length - 1) !== '/') {
+	if (cburl!=='') {
 		// Format the url before appending servicebase
-		_serviceurl = cburl + '/' + _servicebase;
+		_serviceurl = cburl + (cburl.substr(cburl.length - 1) == '/' ? '' : '/') + _servicebase;
 	}
 }
 
