@@ -1,0 +1,28 @@
+{
+  "name": "react-admin-corebos",
+  "version": "0.8.0",
+  "description": "coreBOS web service data providor for react-admin",
+  "main": "corebosServerProvider.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "CoreBOS",
+    "CRM",
+    "tsolucio",
+    "react",
+    "react-admin",
+    "core",
+    "Business",
+    "Operating",
+    "System"
+  ],
+  "author": "Joe Bordes <joe@tsolucio.com>",
+  "license": "ISC",
+  "dependencies": {
+    "node-fetch": "^2.6.0"
+  },
+  "devDependencies": {
+    "babel-minify": "^0.5.1"
+  }
+}
