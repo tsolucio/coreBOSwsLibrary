@@ -1,7 +1,7 @@
 {
   "name": "react-admin-corebos",
   "version": "0.8.0",
-  "description": "coreBOS web service data providor for react-admin",
+  "description": "coreBOS web service data provider for react-admin",
   "main": "corebosServerProvider.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

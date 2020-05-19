@@ -1,8 +1,13 @@
 import * as cbconn from 'corebos-ws-lib/WSClientm';
 
+const logdata = localStorage.getItem('coreboslogindata');
 const apiUrl = 'http://localhost/coreBOSwork';
 cbconn.setURL(apiUrl);
-cbconn.doLogin('admin', 'admin', true);
+if (!logdata) {
+    cbconn.doLogin('admin', 'admin', true);
+} else {
+    cbconn.setSession(JSON.parse(logdata));
+}
 
 function convertFilter2Query(filter) {
     let search = '';

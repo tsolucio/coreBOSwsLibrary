@@ -1,3 +1,5 @@
+import { unstable_batchedUpdates } from "react-dom";
+
 const _servicebase = 'webservice.php';
 var _serviceurl = '';
 
@@ -32,6 +34,18 @@ export function setURL(cburl) {
 		// Format the url before appending servicebase
 		_serviceurl = cburl + (cburl.substr(cburl.length - 1) == '/' ? '' : '/') + _servicebase;
 	}
+}
+
+export function setSession(logindata) {
+	_sessionid = logindata.sessionName;
+	_userid = logindata.userId;
+}
+
+export function getSession() {
+	return {
+		'sessionName': _sessionid,
+		'userId': _userid
+	};
 }
 
 /**
@@ -86,6 +100,7 @@ function __doChallenge(username) {
 	// reqtype = 'GET';
 	let params = '?operation=getchallenge&username=' + username;
 	fetchOptions.method = 'get';
+	delete fetchOptions.body;
 	return fetch(_serviceurl + params, fetchOptions)
 		.then(status)
 		.then(getData);
@@ -94,46 +109,47 @@ function __doChallenge(username) {
 /**
  * Login Operation
  */
-export function doLogin(username, accesskey, withpassword) {
+export async function doLogin(username, accesskey, withpassword) {
 	// reqtype = 'POST';
 	_serviceuser = username;
 	_servicekey = accesskey;
 	if (withpassword === undefined) {
 		withpassword = false;
 	}
-	return new Promise((resolve, reject) => {
-		__doChallenge(username)
-			.then(function (data) {
-				if (hasError(data) === false) {
-					let result = data['result'];
-					_servicetoken = result.token;
-					_servertime = result.serverTime;
-					_expiretime = result.expireTime;
-					fetchOptions.method = 'post';
-					let postdata = 'operation=login&username=' + username;
-					postdata += '&accessKey=' + (withpassword ? _servicetoken + accesskey : cbMD5(_servicetoken + accesskey));
-					fetchOptions.body = postdata;
+	let login = false;
+	await __doChallenge(username)
+		.then(async function (data) {
+			if (hasError(data) === false) {
+				let result = data['result'];
+				_servicetoken = result.token;
+				_servertime = result.serverTime;
+				_expiretime = result.expireTime;
+				fetchOptions.method = 'post';
+				let postdata = 'operation=login&username=' + username;
+				postdata += '&accessKey=' + (withpassword ? _servicetoken + accesskey : cbMD5(_servicetoken + accesskey));
+				fetchOptions.body = postdata;
 
-					fetch(_serviceurl, fetchOptions)
-						.then(status)
-						.then(getData)
-						.then(logindata => {
-							if (hasError(logindata) === false) {
-								var result = logindata['result'];
-								_sessionid = result.sessionName;
-								_userid = result.userId;
-								resolve(logindata);
-							} else {
-								reject(new Error('incorrect response: ' + lastError()));
-							}
-						})
-						.catch(error => reject(error));
-				} else {
-					reject(new Error('incorrect response: ' + lastError()));
-				}
-			})
-			.catch(error => reject(error));
-	});
+				await fetch(_serviceurl, fetchOptions)
+					.then(status)
+					.then(getData)
+					.then(logindata => {
+						if (hasError(logindata) === false) {
+							var result = logindata['result'];
+							_sessionid = result.sessionName;
+							_userid = result.userId;
+							login = logindata;
+							Promise.resolve(logindata);
+						} else {
+							Promise.reject(new Error('incorrect response: ' + lastError()));
+						}
+					})
+					.catch(error => Promise.reject(error));
+			} else {
+				return new Error('incorrect response: ' + lastError());
+			}
+		})
+		.catch(error => { Promise.reject(error)});
+	return login;
 }
 
 /**
