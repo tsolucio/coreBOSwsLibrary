@@ -11,15 +11,69 @@ if (!logdata) {
 
 function convertFilter2Query(filter) {
     let search = '';
-    if (!Array.isArray(filter)) {
+    if (!Array.isArray(filter)) { // react admin filter format
         if (typeof filter == 'object') {
             for (let [key, value] of Object.entries(filter)) {
-                search += (search==='' ? '' : ' OR ')+`${key} like '%${value}%'`;
+                let nsrch = [];
+                if (key.substr(0, 13)==='cblistsearch_') {
+                    let [prefix, module] = key.split('_');
+                    let enamefield = window.coreBOS.Describe[module].labelFields;
+                    if (enamefield.indexOf(',')!==-1) {
+                        let enames = enamefield.split(',');
+                        const grprand = Math.floor(Math.random() * 10);
+                        for (let sf = 0; sf < enames.length; sf++) {
+                            nsrch.push(
+                                {
+                                    'fieldname':enames[sf],
+                                    'operation':'contains',
+                                    'value':value,
+                                    'valuetype':'raw',
+                                    'joincondition':'or',
+                                    'groupid':'racblegrp'+grprand,
+                                    'groupjoin':'and'
+                                }
+                            );
+                        }
+                    } else {
+                        nsrch = [{
+                            'fieldname':window.coreBOS.Describe[module].labelFields,
+                            'operation':'contains',
+                            'value':value,
+                            'valuetype':'raw',
+                            'joincondition':'or',
+                            'groupid':'racblgroup',
+                            'groupjoin':'and'
+                        }];
+                    }
+                } else if (key.substr(0, 15)==='cbfiltersearch_') {
+                    nsrch = JSON.parse(value);
+                } else {
+                    nsrch = [{
+                        'fieldname':key,
+                        'operation':'contains',
+                        'value':value,
+                        'valuetype':'raw',
+                        'joincondition':'or',
+                        'groupid':'ragroup',
+                        'groupjoin':'and'
+                    }];
+                }
+                if (search==='') {
+                    search = JSON.stringify(nsrch);
+                } else {
+                    let osrch = JSON.parse(search);
+                    if (osrch[osrch.length-1].joincondition === '') {
+                        osrch[osrch.length-1].joincondition = 'or';
+                    }
+                    osrch[osrch.length-1].groupjoin = 'and';
+                    search = JSON.stringify(osrch.concat(nsrch));
+                }
             }
             search = ' where ' + search;
         }
         return search;
     }
+    // else coreBOS query format
     let vals = '';
     let prevglue = '';
     let apglue = '';
