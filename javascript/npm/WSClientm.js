@@ -539,6 +539,32 @@ export function doInvoke(method, params, type) {
 }
 
 /**
+ * Validate Information
+ */
+export function doValidateInformation(record, module, recordInformation) {
+	// reqtype = 'POST';
+	recordInformation.module = recordInformation.module || module;
+	recordInformation.record = recordInformation.record || record;
+	let postdata = 'operation=ValidateInformation&sessionName=' + _sessionid;
+	postdata += '&context=' + JSON.stringify(recordInformation);
+	fetchOptions.body = postdata;
+	fetchOptions.method = 'post';
+	return fetch(_serviceurl, fetchOptions)
+		.then(status)
+		.then(getData)
+		.then(function (data) {
+			if (data.success) {
+				return Promise.resolve(data['result']);
+			} else {
+				return Promise.reject(data['result']);
+			}
+		})
+		.catch(function (error) {
+			return Promise.reject(error);
+		});
+}
+
+/**
  * Retrieve related records.
  */
 export function doGetRelatedRecords(record, module, relatedModule, queryParameters) {

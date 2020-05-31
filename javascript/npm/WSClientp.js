@@ -491,6 +491,35 @@ var cbWSClient = function (url) {
 	};
 
 	/**
+	 * Validate Information
+	 */
+	this.doValidateInformation = function (record, module, recordInformation) {
+		// Perform re-login if required.
+		this.__checkLogin();
+
+		// reqtype = 'POST';
+		recordInformation.module = recordInformation.module || module;
+		recordInformation.record = recordInformation.record || record;
+		let postdata = 'operation=ValidateInformation&sessionName=' + _sessionid;
+		postdata += '&context=' + JSON.stringify(recordInformation);
+		this.fetchOptions.body = postdata;
+		this.fetchOptions.method = 'post';
+		return fetch(this._serviceurl, this.fetchOptions)
+			.then(this.status)
+			.then(this.getData)
+			.then(function (data) {
+				if (data.success) {
+					return Promise.resolve(data['result']);
+				} else {
+					return Promise.reject(data['result']);
+				}
+			})
+			.catch(function (error) {
+				return Promise.reject(error);
+			});
+	};
+
+	/**
 	 * Retrieve related records.
 	 */
 	this.doGetRelatedRecords = function (record, module, relatedModule, queryParameters) {
