@@ -1,8 +1,6 @@
 import * as cbconn from 'corebos-ws-lib/WSClientm';
 
 const logdata = localStorage.getItem('coreboslogindata');
-const apiUrl = 'http://localhost/coreBOSwork';
-cbconn.setURL(apiUrl);
 if (!logdata) {
     cbconn.doLogin('admin', 'admin', true);
 } else {
@@ -195,7 +193,7 @@ export default {
     },
 
     update: (resource, params) =>
-        cbconn.doUpdate('Accounts', params.data)
+        cbconn.doUpdate(window.coreBOS.ResourceModules[resource], params.data)
             .then((data) => { return { 'data': data } })
     ,
 
@@ -205,7 +203,7 @@ export default {
     ,
 
     create: (resource, params) =>
-        cbconn.doCreate('Accounts', params.data)
+        cbconn.doCreate(window.coreBOS.ResourceModules[resource], params.data)
             .then((data) => { return { 'data': data, id: data['id'] } })
     ,
 
