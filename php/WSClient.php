@@ -459,7 +459,7 @@ class Vtiger_WSClient {
 			'elementType' => $modulename,
 			'element' => json_encode($createFields),
 			'searchOn' => $searchOn,
-			'updatedfields' => implode(',',$updatedfields),
+			'updatedfields' => implode(',', $updateFields),
 		);
 		$resultdata = $this->_client->doPost($postdata, true);
 		if ($this->hasError($resultdata)) {
