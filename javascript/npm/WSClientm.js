@@ -191,17 +191,17 @@ export async function doLoginPortal(username, password, hashmethod, entity) {
 
 				switch (hashmethod) {
 					case 'sha256':
-						hashed = CryptoJS.SHA256(password).toString(CryptoJS.enc.Base64);
+						hashed = CryptoJS.SHA256(_servicetoken + password).toString();
 						break;
 					case 'sha512':
-						hashed =  CryptoJS.SHA512(password).toString(CryptoJS.enc.Base64);
+						hashed = CryptoJS.SHA512(_servicetoken + password).toString();
 						break;
 					case 'plaintext':
-						hashed =  password;
+						hashed = _servicetoken + password;
 						break;
 					case 'md5':
 					default:
-						hashed = cbMD5(password);
+						hashed = cbMD5(_servicetoken + password);
 						break;
 				}
 

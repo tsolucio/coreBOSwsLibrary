@@ -174,17 +174,17 @@ var cbWSClient = function (url) {
 
 						switch (hashmethod) {
 							case 'sha256':
-								hashed = CryptoJS.SHA256(password).toString(CryptoJS.enc.Base64);
+								hashed = CryptoJS.SHA256(myself._servicetoken + password).toString();
 								break;
 							case 'sha512':
-								hashed =  CryptoJS.SHA512(password).toString(CryptoJS.enc.Base64);
+								hashed = CryptoJS.SHA512(myself._servicetoken + password).toString();
 								break;
 							case 'plaintext':
-								hashed =  password;
+								hashed = myself._servicetoken + password;
 								break;
 							case 'md5':
 							default:
-								hashed = cbMD5(password);
+								hashed = cbMD5(myself._servicetoken + password);
 								break;
 						}
 
