@@ -1,4 +1,5 @@
-const fetch = require('node-fetch');
+const fetch = require('node-fetch'); 
+import CryptoJS from 'crypto-js'
 
 var cbWSClient = function (url) {
 	this._servicebase = 'webservice.php';
@@ -153,13 +154,10 @@ var cbWSClient = function (url) {
 	/**
 	 * Login Operation
 	 */
-	this.doLoginPortal = function (username, accesskey, withpassword) {
-		// reqtype = 'POST';
+	this.doLoginPortal = function (username, password, hashmethod, entity) {
+		// reqtype = 'GET';
 		this._serviceuser = username;
-		this._servicekey = accesskey;
-		if (withpassword == undefined) {
-			withpassword = false;
-		}
+		this._servicekey = accesskey; 
 		let myself = this;
 
 		return new Promise((resolve, reject) => {
@@ -170,10 +168,30 @@ var cbWSClient = function (url) {
 						myself._servicetoken = result.token;
 						myself._servertime = result.serverTime;
 						myself._expiretime = result.expireTime;
-						myself.fetchOptions.method = 'post';
-						let postdata = '?operation=loginPortal&username=' + username + '&entity=Contacts';
-						postdata += '&password=' + (withpassword ? myself._servicetoken + accesskey : cbMD5(myself._servicetoken + accesskey));
-						myself.fetchOptions.body = postdata;
+						myself.fetchOptions.method = 'get';
+						let postdata = '?operation=loginPortal&username=' + username + '&entity=' + entity || 'Contacts';
+						let hashed = ''
+
+						switch (hashmethod) {
+							case 'sha256':
+								hashed = CryptoJS.SHA256(password).toString(CryptoJS.enc.Base64);
+								break;
+							case 'sha512':
+								hashed =  CryptoJS.SHA512(password).toString(CryptoJS.enc.Base64);
+								break;
+							case 'plaintext':
+								hashed =  password;
+								break;
+							case 'md5':
+							default:
+								hashed = cbMD5(password);
+								break;
+						}
+
+						postdata += '&password=' + hashed;
+						fetchOptions.body = postdata;
+
+ 						myself.fetchOptions.body = postdata;
 
 						fetch(myself._serviceurl + postdata, myself.fetchOptions)
 							.then(myself.status)

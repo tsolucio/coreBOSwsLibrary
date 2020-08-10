@@ -1,4 +1,5 @@
 import { unstable_batchedUpdates } from "react-dom";
+import CryptoJS from 'crypto-js'
 
 const _servicebase = 'webservice.php';
 var _serviceurl = '';
@@ -172,13 +173,10 @@ export async function doLogin(username, accesskey, withpassword) {
 /**
  * Do Login Portal Operation
  */
-export async function doLoginPortal(username, accesskey, withpassword) {
-	// reqtype = 'POST';
+export async function doLoginPortal(username, password, hashmethod, entity) {
+	// reqtype = 'GET';
 	_serviceuser = username;
-	_servicekey = accesskey;
-	if (withpassword === undefined) {
-		withpassword = false;
-	}
+	_servicekey = accesskey; 
 	let login = false;
 	await __doChallenge(username)
 		.then(async function (data) {
@@ -188,8 +186,26 @@ export async function doLoginPortal(username, accesskey, withpassword) {
 				_servertime = result.serverTime;
 				_expiretime = result.expireTime;
 				fetchOptions.method = 'get';
-				let postdata = '?operation=loginPortal&username=' + username + '&entity=Contacts';
-				postdata += '&password=' + (withpassword ? _servicetoken + accesskey : cbMD5(_servicetoken + accesskey));
+				let postdata = '?operation=loginPortal&username=' + username + '&entity=' + entity || 'Contacts';
+				let hashed = ''
+
+				switch (hashmethod) {
+					case 'sha256':
+						hashed = CryptoJS.SHA256(password).toString(CryptoJS.enc.Base64);
+						break;
+					case 'sha512':
+						hashed =  CryptoJS.SHA512(password).toString(CryptoJS.enc.Base64);
+						break;
+					case 'plaintext':
+						hashed =  password;
+						break;
+					case 'md5':
+					default:
+						hashed = cbMD5(password);
+						break;
+				}
+
+				postdata += '&password=' + hashed;
 				fetchOptions.body = postdata;
 
 				await fetch(_serviceurl + postdata, fetchOptions)
