@@ -157,7 +157,7 @@ var cbWSClient = function (url) {
 	this.doLoginPortal = function (username, password, hashmethod, entity) {
 		// reqtype = 'GET';
 		this._serviceuser = username;
-		this._servicekey = accesskey; 
+		this._servicekey = password; 
 		let myself = this;
 
 		return new Promise((resolve, reject) => {

@@ -176,7 +176,7 @@ export async function doLogin(username, accesskey, withpassword) {
 export async function doLoginPortal(username, password, hashmethod, entity) {
 	// reqtype = 'GET';
 	_serviceuser = username;
-	_servicekey = accesskey; 
+	_servicekey = password; 
 	let login = false;
 	await __doChallenge(username)
 		.then(async function (data) {
