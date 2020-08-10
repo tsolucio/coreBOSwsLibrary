@@ -187,12 +187,12 @@ export async function doLoginPortal(username, accesskey, withpassword) {
 				_servicetoken = result.token;
 				_servertime = result.serverTime;
 				_expiretime = result.expireTime;
-				fetchOptions.method = 'post';
-				let postdata = 'operation=loginPortal&username=' + username;
-				postdata += '&accessKey=' + (withpassword ? _servicetoken + accesskey : cbMD5(_servicetoken + accesskey));
+				fetchOptions.method = 'get';
+				let postdata = '?operation=loginPortal&username=' + username + '&entity=Contacts';
+				postdata += '&password=' + (withpassword ? _servicetoken + accesskey : cbMD5(_servicetoken + accesskey));
 				fetchOptions.body = postdata;
 
-				await fetch(_serviceurl, fetchOptions)
+				await fetch(_serviceurl + postdata, fetchOptions)
 					.then(status)
 					.then(getData)
 					.then(logindata => {

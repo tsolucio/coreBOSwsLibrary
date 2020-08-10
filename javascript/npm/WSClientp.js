@@ -171,11 +171,11 @@ var cbWSClient = function (url) {
 						myself._servertime = result.serverTime;
 						myself._expiretime = result.expireTime;
 						myself.fetchOptions.method = 'post';
-						let postdata = 'operation=loginPortal&username=' + username;
-						postdata += '&accessKey=' + (withpassword ? myself._servicetoken + accesskey : cbMD5(myself._servicetoken + accesskey));
+						let postdata = '?operation=loginPortal&username=' + username + '&entity=Contacts';
+						postdata += '&password=' + (withpassword ? myself._servicetoken + accesskey : cbMD5(myself._servicetoken + accesskey));
 						myself.fetchOptions.body = postdata;
 
-						fetch(myself._serviceurl, myself.fetchOptions)
+						fetch(myself._serviceurl + postdata, myself.fetchOptions)
 							.then(myself.status)
 							.then(myself.getData)
 							.then(logindata => {
@@ -609,10 +609,10 @@ var cbWSClient = function (url) {
 		// Perform re-login if required.
 		this.__checkLogin();
 
-		// reqtype = 'POST';
+		// reqtype = 'GET';
 		let postdata = 'operation=SetRelation&sessionName=' + this._sessionid + '&relate_this_id=' + relate_this_id + '&with_these_ids=' + JSON.stringify(with_these_ids);
 		this.fetchOptions.body = postdata;
-		this.fetchOptions.method = 'post';
+		this.fetchOptions.method = 'get';
 		let myself = this;
 		return fetch(this._serviceurl, this.fetchOptions)
 			.then(this.status)
