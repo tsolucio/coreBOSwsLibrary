@@ -16,6 +16,10 @@ var _servicetoken=false;
 var _sessionid  = false;
 var _userid     = false;
 
+// Webservice login user data
+var _entityid = ''
+var _language = ''
+
 // Last operation error information
 var _lasterror  = false;
 
@@ -45,6 +49,18 @@ export function getSession() {
 	return {
 		'sessionName': _sessionid,
 		'userId': _userid
+	};
+}
+
+export function getEntityId() {
+	return {
+		'entityid': _entityid,
+	};
+}
+
+export function getLanguage() {
+	return {
+		'language': _language,
 	};
 }
 
@@ -137,6 +153,55 @@ export async function doLogin(username, accesskey, withpassword) {
 							var result = logindata['result'];
 							_sessionid = result.sessionName;
 							_userid = result.userId;
+
+							login = logindata;
+							Promise.resolve(logindata);
+						} else {
+							Promise.reject(new Error('incorrect response: ' + lastError()));
+						}
+					})
+					.catch(error => Promise.reject(error));
+			} else {
+				return new Error('incorrect response: ' + lastError());
+			}
+		})
+		.catch(error => { Promise.reject(error)});
+	return login;
+}
+
+/**
+ * Do Login Portal Operation
+ */
+export async function doLoginPortal(username, accesskey, withpassword) {
+	// reqtype = 'POST';
+	_serviceuser = username;
+	_servicekey = accesskey;
+	if (withpassword === undefined) {
+		withpassword = false;
+	}
+	let login = false;
+	await __doChallenge(username)
+		.then(async function (data) {
+			if (hasError(data) === false) {
+				let result = data['result'];
+				_servicetoken = result.token;
+				_servertime = result.serverTime;
+				_expiretime = result.expireTime;
+				fetchOptions.method = 'post';
+				let postdata = 'operation=loginPortal&username=' + username;
+				postdata += '&accessKey=' + (withpassword ? _servicetoken + accesskey : cbMD5(_servicetoken + accesskey));
+				fetchOptions.body = postdata;
+
+				await fetch(_serviceurl, fetchOptions)
+					.then(status)
+					.then(getData)
+					.then(logindata => {
+						if (hasError(logindata) === false) {
+							var result = logindata['result'];
+							_sessionid = result.sessionName;
+							_userid = result.userId;
+							_entityid = result.entityid;
+							_language = result.language;
 							login = logindata;
 							Promise.resolve(logindata);
 						} else {
