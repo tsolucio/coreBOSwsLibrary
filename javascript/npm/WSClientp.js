@@ -1,4 +1,5 @@
-const fetch = require('node-fetch');
+const fetch = require('node-fetch'); 
+import CryptoJS from 'crypto-js'
 
 var cbWSClient = function (url) {
 	this._servicebase = 'webservice.php';
@@ -21,6 +22,10 @@ var cbWSClient = function (url) {
 	// Webservice login credentials
 	this._sessionid  = false;
 	this._userid     = false;
+
+	// Webservice login user data
+	this._entityid = '';
+	this._language = '';
 
 	// Last operation error information
 	this._lasterror  = false;
@@ -132,6 +137,72 @@ var cbWSClient = function (url) {
 									var result = logindata['result'];
 									myself._sessionid = result.sessionName;
 									myself._userid = result.userId;
+									resolve(logindata);
+								} else {
+									reject(new Error('incorrect response: ' + myself.lastError()));
+								}
+							})
+							.catch(error => reject(error));
+					} else {
+						reject(new Error('incorrect response: ' + myself.lastError()));
+					}
+				})
+				.catch(error => reject(error));
+		});
+	};
+
+	/**
+	 * Login Operation
+	 */
+	this.doLoginPortal = function (username, password, hashmethod, entity) {
+		// reqtype = 'GET';
+		this._serviceuser = username;
+		this._servicekey = accesskey; 
+		let myself = this;
+
+		return new Promise((resolve, reject) => {
+			this.__doChallenge(username)
+				.then(function (data) {
+					if (myself.hasError(data) == false) {
+						let result = data['result'];
+						myself._servicetoken = result.token;
+						myself._servertime = result.serverTime;
+						myself._expiretime = result.expireTime;
+						myself.fetchOptions.method = 'get';
+						let postdata = '?operation=loginPortal&username=' + username + '&entity=' + entity || 'Contacts';
+						let hashed = ''
+
+						switch (hashmethod) {
+							case 'sha256':
+								hashed = CryptoJS.SHA256(myself._servicetoken + password).toString();
+								break;
+							case 'sha512':
+								hashed = CryptoJS.SHA512(myself._servicetoken + password).toString();
+								break;
+							case 'plaintext':
+								hashed = myself._servicetoken + password;
+								break;
+							case 'md5':
+							default:
+								hashed = cbMD5(myself._servicetoken + password);
+								break;
+						}
+
+						postdata += '&password=' + hashed;
+						fetchOptions.body = postdata;
+
+ 						myself.fetchOptions.body = postdata;
+
+						fetch(myself._serviceurl + postdata, myself.fetchOptions)
+							.then(myself.status)
+							.then(myself.getData)
+							.then(logindata => {
+								if (myself.hasError(logindata) == false) {
+									var result = logindata['result'];
+									myself._sessionid = result.sessionName;
+									myself._userid = result.userId;
+									myself._entityid = result.entityid;
+									myself._language = result.language;
 									resolve(logindata);
 								} else {
 									reject(new Error('incorrect response: ' + myself.lastError()));
@@ -556,10 +627,10 @@ var cbWSClient = function (url) {
 		// Perform re-login if required.
 		this.__checkLogin();
 
-		// reqtype = 'POST';
+		// reqtype = 'GET';
 		let postdata = 'operation=SetRelation&sessionName=' + this._sessionid + '&relate_this_id=' + relate_this_id + '&with_these_ids=' + JSON.stringify(with_these_ids);
 		this.fetchOptions.body = postdata;
-		this.fetchOptions.method = 'post';
+		this.fetchOptions.method = 'get';
 		let myself = this;
 		return fetch(this._serviceurl, this.fetchOptions)
 			.then(this.status)

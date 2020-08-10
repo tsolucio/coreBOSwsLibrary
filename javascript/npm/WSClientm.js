@@ -1,4 +1,5 @@
 import { unstable_batchedUpdates } from "react-dom";
+import CryptoJS from 'crypto-js'
 
 const _servicebase = 'webservice.php';
 var _serviceurl = '';
@@ -15,6 +16,10 @@ var _servicetoken=false;
 // Webservice login credentials
 var _sessionid  = false;
 var _userid     = false;
+
+// Webservice login user data
+var _entityid = ''
+var _language = ''
 
 // Last operation error information
 var _lasterror  = false;
@@ -45,6 +50,18 @@ export function getSession() {
 	return {
 		'sessionName': _sessionid,
 		'userId': _userid
+	};
+}
+
+export function getEntityId() {
+	return {
+		'entityid': _entityid,
+	};
+}
+
+export function getLanguage() {
+	return {
+		'language': _language,
 	};
 }
 
@@ -137,6 +154,70 @@ export async function doLogin(username, accesskey, withpassword) {
 							var result = logindata['result'];
 							_sessionid = result.sessionName;
 							_userid = result.userId;
+
+							login = logindata;
+							Promise.resolve(logindata);
+						} else {
+							Promise.reject(new Error('incorrect response: ' + lastError()));
+						}
+					})
+					.catch(error => Promise.reject(error));
+			} else {
+				return new Error('incorrect response: ' + lastError());
+			}
+		})
+		.catch(error => { Promise.reject(error)});
+	return login;
+}
+
+/**
+ * Do Login Portal Operation
+ */
+export async function doLoginPortal(username, password, hashmethod, entity) {
+	// reqtype = 'GET';
+	_serviceuser = username;
+	_servicekey = accesskey; 
+	let login = false;
+	await __doChallenge(username)
+		.then(async function (data) {
+			if (hasError(data) === false) {
+				let result = data['result'];
+				_servicetoken = result.token;
+				_servertime = result.serverTime;
+				_expiretime = result.expireTime;
+				fetchOptions.method = 'get';
+				let postdata = '?operation=loginPortal&username=' + username + '&entity=' + entity || 'Contacts';
+				let hashed = ''
+
+				switch (hashmethod) {
+					case 'sha256':
+						hashed = CryptoJS.SHA256(_servicetoken + password).toString();
+						break;
+					case 'sha512':
+						hashed = CryptoJS.SHA512(_servicetoken + password).toString();
+						break;
+					case 'plaintext':
+						hashed = _servicetoken + password;
+						break;
+					case 'md5':
+					default:
+						hashed = cbMD5(_servicetoken + password);
+						break;
+				}
+
+				postdata += '&password=' + hashed;
+				fetchOptions.body = postdata;
+
+				await fetch(_serviceurl + postdata, fetchOptions)
+					.then(status)
+					.then(getData)
+					.then(logindata => {
+						if (hasError(logindata) === false) {
+							var result = logindata['result'];
+							_sessionid = result.sessionName;
+							_userid = result.userId;
+							_entityid = result.entityid;
+							_language = result.language;
 							login = logindata;
 							Promise.resolve(logindata);
 						} else {

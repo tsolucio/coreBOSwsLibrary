@@ -167,7 +167,7 @@ var Vtiger_WSClient = function (url) {
 			}
 		});
 	};
-
+ 
 	/**
 	 * Do Logout Operation
 	 */
