@@ -156,15 +156,13 @@ var cbWSClient = function (url) {
 	 */
 	this.doLoginPortal = function (username, password, hashmethod, entity) {
 		// reqtype = 'GET';
-		this._serviceuser = username;
-		this._servicekey = password; 
 		let myself = this;
 
 		return new Promise((resolve, reject) => {
 			this.__doChallenge(username)
 				.then(function (data) {
 					if (myself.hasError(data) == false) {
-						let result = data['result'];
+						let result = data['result'];  
 						myself._servicetoken = result.token;
 						myself._servertime = result.serverTime;
 						myself._expiretime = result.expireTime;
@@ -200,6 +198,8 @@ var cbWSClient = function (url) {
 								if (myself.hasError(logindata) == false) {
 									var result = logindata['result'];
 									myself._sessionid = result.sessionName;
+									myself._serviceuser = result.user.user_name;
+									myself._servicekey = result.user.accesskey;
 									myself._userid = result.userId;
 									myself._entityid = result.entityid;
 									myself._language = result.language;
