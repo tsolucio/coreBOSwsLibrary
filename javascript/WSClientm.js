@@ -1,5 +1,4 @@
-import { unstable_batchedUpdates } from "react-dom";
-import CryptoJS from 'crypto-js'
+// Include crypto-js library if you need to use doLoginPortal
 
 const _servicebase = 'webservice.php';
 var _serviceurl = '';

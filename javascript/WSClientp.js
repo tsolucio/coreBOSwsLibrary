@@ -1,5 +1,4 @@
-const fetch = require('node-fetch'); 
-import CryptoJS from 'crypto-js'
+// Include crypto-js library if you need to use doLoginPortal
 
 var cbWSClient = function (url) {
 	this._servicebase = 'webservice.php';
