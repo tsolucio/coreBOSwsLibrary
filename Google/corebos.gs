@@ -359,7 +359,9 @@ function getResultColumns(result) {
 	return columns;
 };
 
-
+/**
+ * Describe Module Fields.
+ */
 function doDescribe(module) {
 	// Perform re-login if required.
 	this.__checkLogin();
