@@ -246,7 +246,7 @@ function doInvoke(method, params, type) {
 			var response = this.post(senddata);
 		if(reqtype=='GET')
 			var response = this.get(senddata);
-	`	if (this.hasError(response)){
+		if (this.hasError(response)){
 			return false;
 		};
 		if (response.success){
@@ -289,6 +289,37 @@ function doQuery(query){
 	}
 };
 
+/**
+ *
+ * @param moduleName
+ * @param createFields
+ * @param searchOn
+ * @param updateFields
+ * @returns {{type: Number | NumberConstructor, value: number, notify: boolean}|{observer: string, type: NumberConstructor, value: number, notify: boolean}|T|SpeechRecognitionEvent|SVGAnimatedString|string|ArrayBuffer|boolean}
+ */
+
+function doUpsert(moduleName, createFields, searchOn, updateFields){
+	Logger.log("Info::doUpsert entry.")
+	this.__checkLogin();
+	if(createFields['assigned_user_id'] !== 'undefined'){
+		createFields['assigned_user_id'] = this._userid
+	}
+
+	var postData = {
+		operation: 'upsert',
+		sessionName: this._sessionid,
+		elementType: moduleName,
+		element: createFields,
+		searchOn: searchOn,
+		updateFields: updateFields
+	};
+
+	var resultData = this.post(postData);
+	if(this.hasError(resultData)){
+		return false;
+	}
+	return resultData.result
+}
 
 function doLogout(){
 	Logger.log("Info::doLogout");
