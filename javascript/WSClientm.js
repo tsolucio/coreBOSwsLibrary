@@ -23,6 +23,9 @@ var _language = ''
 // Last operation error information
 var _lasterror  = false;
 
+//Session Expiry event
+window.coreBOS.SessionExpired = new CustomEvent('coreBOSSessionExpiredEvent', {});
+
 // Version
 var version = 'coreBOS2.1';
 
@@ -302,7 +305,12 @@ export function doQuery(query) {
 			if (hasError(data) === false) {
 				return Promise.resolve(data['result']);
 			} else {
-				return Promise.reject(new Error('incorrect response: '+lastError()));
+				let errorCode = data.split(':')[1]?.trim() ?? '';
+				if (errorCode == 'INVALID_SESSIONID') {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}else {
+					return Promise.reject(new Error('incorrect response: '+lastError()));
+				}
 			}
 		})
 		.catch(function (error) {
