@@ -305,8 +305,8 @@ export function doQuery(query) {
 			if (hasError(data) === false) {
 				return Promise.resolve(data['result']);
 			} else {
-				let errorCode = data.split(':')[1]?.trim() ?? '';
-				if (errorCode == 'INVALID_SESSIONID') {
+				const isSessionExpired = sessionValidityDetector(data);
+				if (isSessionExpired) {
 					window.dispatchEvent(window.coreBOS.SessionExpired);
 				}else {
 					return Promise.reject(new Error('incorrect response: '+lastError()));
@@ -337,7 +337,12 @@ export function doQueryWithTotal(query) {
 			if (hasError(data) === false) {
 				return Promise.resolve({'result': data['result'], 'totalrows': data['moreinfo']['totalrows']});
 			} else {
-				return Promise.reject(new Error('incorrect response: '+lastError()));
+				const isSessionExpired = sessionValidityDetector(data);
+				if (isSessionExpired) {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}else {
+					return Promise.reject(new Error('incorrect response: '+lastError()));
+				}
 			}
 		})
 		.catch(function (error) {
@@ -383,7 +388,12 @@ export function doListTypes() {
 				}
 				return Promise.resolve(returnvalue);
 			} else {
-				return Promise.reject(new Error('incorrect response: '+lastError()));
+				const isSessionExpired = sessionValidityDetector(data);
+				if (isSessionExpired) {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}else {
+					return Promise.reject(new Error('incorrect response: '+lastError()));
+				}
 			}
 		})
 		.catch(function (error) {
@@ -406,7 +416,12 @@ export function doDescribe(module) {
 			if (hasError(data) === false) {
 				return Promise.resolve(data['result']);
 			} else {
-				return Promise.reject(new Error('incorrect response: '+lastError()));
+				const isSessionExpired = sessionValidityDetector(data);
+				if (isSessionExpired) {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}else {
+					return Promise.reject(new Error('incorrect response: '+lastError()));
+				}
 			}
 		})
 		.catch(function (error) {
@@ -429,7 +444,12 @@ export function doRetrieve(record) {
 			if (hasError(data) === false) {
 				return Promise.resolve(data['result']);
 			} else {
-				return Promise.reject(new Error('incorrect response: '+lastError()));
+				const isSessionExpired = sessionValidityDetector(data);
+				if (isSessionExpired) {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}else {
+					return Promise.reject(new Error('incorrect response: '+lastError()));
+				}
 			}
 		})
 		.catch(function (error) {
@@ -452,7 +472,12 @@ export function doMassRetrieve(ids) {
 			if (hasError(data) === false) {
 				return Promise.resolve(data['result']);
 			} else {
-				return Promise.reject(new Error('incorrect response: '+lastError()));
+				const isSessionExpired = sessionValidityDetector(data);
+				if (isSessionExpired) {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}else {
+					return Promise.reject(new Error('incorrect response: '+lastError()));
+				}
 			}
 		})
 		.catch(function (error) {
@@ -480,7 +505,12 @@ export function doCreate(module, valuemap) {
 			if (hasError(data) === false) {
 				return Promise.resolve(data['result']);
 			} else {
-				return Promise.reject(new Error('incorrect response: '+lastError()));
+				const isSessionExpired = sessionValidityDetector(data);
+				if (isSessionExpired) {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}else {
+					return Promise.reject(new Error('incorrect response: '+lastError()));
+				}
 			}
 		})
 		.catch(function (error) {
@@ -508,7 +538,12 @@ export function doUpdate(module, valuemap) {
 			if (hasError(data) === false) {
 				return Promise.resolve(data['result']);
 			} else {
-				return Promise.reject(new Error('incorrect response: '+lastError()));
+				const isSessionExpired = sessionValidityDetector(data);
+				if (isSessionExpired) {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}else {
+					return Promise.reject(new Error('incorrect response: '+lastError()));
+				}
 			}
 		})
 		.catch(function (error) {
@@ -531,7 +566,12 @@ export function doRevise(module, valuemap) {
 			if (hasError(data) === false) {
 				return Promise.resolve(data['result']);
 			} else {
-				return Promise.reject(new Error('incorrect response: '+lastError()));
+				const isSessionExpired = sessionValidityDetector(data);
+				if (isSessionExpired) {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}else {
+					return Promise.reject(new Error('incorrect response: '+lastError()));
+				}
 			}
 		})
 		.catch(function (error) {
@@ -554,7 +594,12 @@ export function doDelete(id) {
 			if (hasError(data) === false) {
 				return Promise.resolve(data['result']);
 			} else {
-				return Promise.reject(new Error('incorrect response: '+lastError()));
+				const isSessionExpired = sessionValidityDetector(data);
+				if (isSessionExpired) {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}else {
+					return Promise.reject(new Error('incorrect response: '+lastError()));
+				}
 			}
 		})
 		.catch(function (error) {
@@ -577,7 +622,12 @@ export function doMassDelete(ids) {
 			if (hasError(data) === false) {
 				return Promise.resolve(data['result']);
 			} else {
-				return Promise.reject(new Error('incorrect response: '+lastError()));
+				const isSessionExpired = sessionValidityDetector(data);
+				if (isSessionExpired) {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}else {
+					return Promise.reject(new Error('incorrect response: '+lastError()));
+				}
 			}
 		})
 		.catch(function (error) {
@@ -617,7 +667,12 @@ export function doInvoke(method, params, type) {
 			if (hasError(data) === false) {
 				return Promise.resolve(data['result']);
 			} else {
-				return Promise.reject(new Error('incorrect response: '+lastError()));
+				const isSessionExpired = sessionValidityDetector(data);
+				if (isSessionExpired) {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}else {
+					return Promise.reject(new Error('incorrect response: '+lastError()));
+				}
 			}
 		})
 		.catch(function (error) {
@@ -667,7 +722,12 @@ export function doGetRelatedRecords(record, module, relatedModule, queryParamete
 			if (hasError(data) === false) {
 				return Promise.resolve(data['result']);
 			} else {
-				return Promise.reject(new Error('incorrect response: '+lastError()));
+				const isSessionExpired = sessionValidityDetector(data);
+				if (isSessionExpired) {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}else {
+					return Promise.reject(new Error('incorrect response: '+lastError()));
+				}
 			}
 		})
 		.catch(function (error) {
@@ -692,12 +752,25 @@ export function doSetRelated(relate_this_id, with_these_ids) {
 			if (hasError(data) === false) {
 				return Promise.resolve(data['result']);
 			} else {
-				return Promise.reject(new Error('incorrect response: '+lastError()));
+				const isSessionExpired = sessionValidityDetector(data);
+				if (isSessionExpired) {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}else {
+					return Promise.reject(new Error('incorrect response: '+lastError()));
+				}
 			}
 		})
 		.catch(function (error) {
 			return Promise.reject(error);
 		});
+}
+
+/**
+ * Session Validity detector
+ */
+export function sessionValidityDetector(error) {
+	let errorCode = error.split(':')[1]?.trim() ?? '';
+	return (errorCode == 'INVALID_SESSIONID') ? true : false;
 }
 
 // MD5 (Message-Digest Algorithm) by WebToolkit
