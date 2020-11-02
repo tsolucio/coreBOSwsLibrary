@@ -766,7 +766,7 @@ export function doSetRelated(relate_this_id, with_these_ids) {
 }
 
 /**
- * Session Validity detector
+ * Session Validity detector/Checker
  */
 export function sessionValidityDetector(error) {
 	let errorCode = error.split(':')[1]?.trim() ?? '';
