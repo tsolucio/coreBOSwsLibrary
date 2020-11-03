@@ -24,6 +24,12 @@ var _language = ''
 // Last operation error information
 var _lasterror  = false;
 
+if (window.coreBOS === undefined) {
+	window.coreBOS = {};
+}
+//Session Expiry event
+window.coreBOS.SessionExpired = new CustomEvent('coreBOSSessionExpiredEvent', {});
+
 // Version
 var version = 'coreBOS2.1';
 
@@ -303,6 +309,9 @@ export function doQuery(query) {
 			if (hasError(data) === false) {
 				return Promise.resolve(data['result']);
 			} else {
+				if (sessionValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}
 				return Promise.reject(new Error('incorrect response: '+lastError()));
 			}
 		})
@@ -330,6 +339,9 @@ export function doQueryWithTotal(query) {
 			if (hasError(data) === false) {
 				return Promise.resolve({'result': data['result'], 'totalrows': data['moreinfo']['totalrows']});
 			} else {
+				if (sessionValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}
 				return Promise.reject(new Error('incorrect response: '+lastError()));
 			}
 		})
@@ -376,6 +388,9 @@ export function doListTypes() {
 				}
 				return Promise.resolve(returnvalue);
 			} else {
+				if (sessionValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}
 				return Promise.reject(new Error('incorrect response: '+lastError()));
 			}
 		})
@@ -399,6 +414,9 @@ export function doDescribe(module) {
 			if (hasError(data) === false) {
 				return Promise.resolve(data['result']);
 			} else {
+				if (sessionValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}
 				return Promise.reject(new Error('incorrect response: '+lastError()));
 			}
 		})
@@ -422,6 +440,9 @@ export function doRetrieve(record) {
 			if (hasError(data) === false) {
 				return Promise.resolve(data['result']);
 			} else {
+				if (sessionValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}
 				return Promise.reject(new Error('incorrect response: '+lastError()));
 			}
 		})
@@ -445,6 +466,9 @@ export function doMassRetrieve(ids) {
 			if (hasError(data) === false) {
 				return Promise.resolve(data['result']);
 			} else {
+				if (sessionValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}
 				return Promise.reject(new Error('incorrect response: '+lastError()));
 			}
 		})
@@ -473,6 +497,9 @@ export function doCreate(module, valuemap) {
 			if (hasError(data) === false) {
 				return Promise.resolve(data['result']);
 			} else {
+				if (sessionValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}
 				return Promise.reject(new Error('incorrect response: '+lastError()));
 			}
 		})
@@ -501,6 +528,9 @@ export function doUpdate(module, valuemap) {
 			if (hasError(data) === false) {
 				return Promise.resolve(data['result']);
 			} else {
+				if (sessionValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}
 				return Promise.reject(new Error('incorrect response: '+lastError()));
 			}
 		})
@@ -524,6 +554,9 @@ export function doRevise(module, valuemap) {
 			if (hasError(data) === false) {
 				return Promise.resolve(data['result']);
 			} else {
+				if (sessionValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}
 				return Promise.reject(new Error('incorrect response: '+lastError()));
 			}
 		})
@@ -547,6 +580,9 @@ export function doDelete(id) {
 			if (hasError(data) === false) {
 				return Promise.resolve(data['result']);
 			} else {
+				if (sessionValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}
 				return Promise.reject(new Error('incorrect response: '+lastError()));
 			}
 		})
@@ -570,6 +606,9 @@ export function doMassDelete(ids) {
 			if (hasError(data) === false) {
 				return Promise.resolve(data['result']);
 			} else {
+				if (sessionValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}
 				return Promise.reject(new Error('incorrect response: '+lastError()));
 			}
 		})
@@ -610,6 +649,9 @@ export function doInvoke(method, params, type) {
 			if (hasError(data) === false) {
 				return Promise.resolve(data['result']);
 			} else {
+				if (sessionValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}
 				return Promise.reject(new Error('incorrect response: '+lastError()));
 			}
 		})
@@ -660,6 +702,9 @@ export function doGetRelatedRecords(record, module, relatedModule, queryParamete
 			if (hasError(data) === false) {
 				return Promise.resolve(data['result']);
 			} else {
+				if (sessionValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}
 				return Promise.reject(new Error('incorrect response: '+lastError()));
 			}
 		})
@@ -685,12 +730,23 @@ export function doSetRelated(relate_this_id, with_these_ids) {
 			if (hasError(data) === false) {
 				return Promise.resolve(data['result']);
 			} else {
+				if (sessionValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}
 				return Promise.reject(new Error('incorrect response: '+lastError()));
 			}
 		})
 		.catch(function (error) {
 			return Promise.reject(error);
 		});
+}
+
+/**
+ * Session Validity detector/Checker
+ */
+export function sessionValidityDetector(error) {
+	//let errorCode = error.split(':')[1]?.trim() ?? '';
+	return (error.success==false && error.error.code == 'INVALID_SESSIONID');
 }
 
 // MD5 (Message-Digest Algorithm) by WebToolkit
