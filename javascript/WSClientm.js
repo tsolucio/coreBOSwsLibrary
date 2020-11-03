@@ -308,6 +308,7 @@ export function doQuery(query) {
 				const isSessionExpired = sessionValidityDetector(data);
 				if (isSessionExpired) {
 					window.dispatchEvent(window.coreBOS.SessionExpired);
+					return Promise.reject(new Error('incorrect response: '+lastError()));
 				}else {
 					return Promise.reject(new Error('incorrect response: '+lastError()));
 				}
@@ -340,6 +341,7 @@ export function doQueryWithTotal(query) {
 				const isSessionExpired = sessionValidityDetector(data);
 				if (isSessionExpired) {
 					window.dispatchEvent(window.coreBOS.SessionExpired);
+					return Promise.reject(new Error('incorrect response: '+lastError()));
 				}else {
 					return Promise.reject(new Error('incorrect response: '+lastError()));
 				}
@@ -391,6 +393,7 @@ export function doListTypes() {
 				const isSessionExpired = sessionValidityDetector(data);
 				if (isSessionExpired) {
 					window.dispatchEvent(window.coreBOS.SessionExpired);
+					return Promise.reject(new Error('incorrect response: '+lastError()));
 				}else {
 					return Promise.reject(new Error('incorrect response: '+lastError()));
 				}
@@ -419,6 +422,7 @@ export function doDescribe(module) {
 				const isSessionExpired = sessionValidityDetector(data);
 				if (isSessionExpired) {
 					window.dispatchEvent(window.coreBOS.SessionExpired);
+					return Promise.reject(new Error('incorrect response: '+lastError()));
 				}else {
 					return Promise.reject(new Error('incorrect response: '+lastError()));
 				}
@@ -447,6 +451,7 @@ export function doRetrieve(record) {
 				const isSessionExpired = sessionValidityDetector(data);
 				if (isSessionExpired) {
 					window.dispatchEvent(window.coreBOS.SessionExpired);
+					return Promise.reject(new Error('incorrect response: '+lastError()));
 				}else {
 					return Promise.reject(new Error('incorrect response: '+lastError()));
 				}
@@ -475,6 +480,7 @@ export function doMassRetrieve(ids) {
 				const isSessionExpired = sessionValidityDetector(data);
 				if (isSessionExpired) {
 					window.dispatchEvent(window.coreBOS.SessionExpired);
+					return Promise.reject(new Error('incorrect response: '+lastError()));
 				}else {
 					return Promise.reject(new Error('incorrect response: '+lastError()));
 				}
@@ -508,6 +514,7 @@ export function doCreate(module, valuemap) {
 				const isSessionExpired = sessionValidityDetector(data);
 				if (isSessionExpired) {
 					window.dispatchEvent(window.coreBOS.SessionExpired);
+					return Promise.reject(new Error('incorrect response: '+lastError()));
 				}else {
 					return Promise.reject(new Error('incorrect response: '+lastError()));
 				}
@@ -541,6 +548,7 @@ export function doUpdate(module, valuemap) {
 				const isSessionExpired = sessionValidityDetector(data);
 				if (isSessionExpired) {
 					window.dispatchEvent(window.coreBOS.SessionExpired);
+					return Promise.reject(new Error('incorrect response: '+lastError()));
 				}else {
 					return Promise.reject(new Error('incorrect response: '+lastError()));
 				}
@@ -569,6 +577,7 @@ export function doRevise(module, valuemap) {
 				const isSessionExpired = sessionValidityDetector(data);
 				if (isSessionExpired) {
 					window.dispatchEvent(window.coreBOS.SessionExpired);
+					return Promise.reject(new Error('incorrect response: '+lastError()));
 				}else {
 					return Promise.reject(new Error('incorrect response: '+lastError()));
 				}
@@ -597,6 +606,7 @@ export function doDelete(id) {
 				const isSessionExpired = sessionValidityDetector(data);
 				if (isSessionExpired) {
 					window.dispatchEvent(window.coreBOS.SessionExpired);
+					return Promise.reject(new Error('incorrect response: '+lastError()));
 				}else {
 					return Promise.reject(new Error('incorrect response: '+lastError()));
 				}
@@ -625,6 +635,7 @@ export function doMassDelete(ids) {
 				const isSessionExpired = sessionValidityDetector(data);
 				if (isSessionExpired) {
 					window.dispatchEvent(window.coreBOS.SessionExpired);
+					return Promise.reject(new Error('incorrect response: '+lastError()));
 				}else {
 					return Promise.reject(new Error('incorrect response: '+lastError()));
 				}
@@ -670,6 +681,7 @@ export function doInvoke(method, params, type) {
 				const isSessionExpired = sessionValidityDetector(data);
 				if (isSessionExpired) {
 					window.dispatchEvent(window.coreBOS.SessionExpired);
+					return Promise.reject(new Error('incorrect response: '+lastError()));
 				}else {
 					return Promise.reject(new Error('incorrect response: '+lastError()));
 				}
@@ -725,6 +737,7 @@ export function doGetRelatedRecords(record, module, relatedModule, queryParamete
 				const isSessionExpired = sessionValidityDetector(data);
 				if (isSessionExpired) {
 					window.dispatchEvent(window.coreBOS.SessionExpired);
+					return Promise.reject(new Error('incorrect response: '+lastError()));
 				}else {
 					return Promise.reject(new Error('incorrect response: '+lastError()));
 				}
@@ -755,6 +768,7 @@ export function doSetRelated(relate_this_id, with_these_ids) {
 				const isSessionExpired = sessionValidityDetector(data);
 				if (isSessionExpired) {
 					window.dispatchEvent(window.coreBOS.SessionExpired);
+					return Promise.reject(new Error('incorrect response: '+lastError()));
 				}else {
 					return Promise.reject(new Error('incorrect response: '+lastError()));
 				}
