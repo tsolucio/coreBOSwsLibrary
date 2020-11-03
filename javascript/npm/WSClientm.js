@@ -745,8 +745,8 @@ export function doSetRelated(relate_this_id, with_these_ids) {
  * Session Validity detector/Checker
  */
 export function sessionValidityDetector(error) {
-	let errorCode = error.split(':')[1]?.trim() ?? '';
-	return (errorCode == 'INVALID_SESSIONID') ? true : false;
+	//let errorCode = error.split(':')[1]?.trim() ?? '';
+	return (error.success==false && error.error.code == 'INVALID_SESSIONID');
 }
 
 // MD5 (Message-Digest Algorithm) by WebToolkit

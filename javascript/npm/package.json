@@ -1,6 +1,6 @@
 {
   "name": "corebos-ws-lib",
-  "version": "2.5.1",
+  "version": "2.5.2",
   "description": "CoreBOS Web service client Library",
   "main": "WSClientm.js",
   "scripts": {
