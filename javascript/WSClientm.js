@@ -23,6 +23,9 @@ var _language = ''
 // Last operation error information
 var _lasterror  = false;
 
+if (window.coreBOS === undefined) {
+	window.coreBOS = {};
+}
 //Session Expiry event
 window.coreBOS.SessionExpired = new CustomEvent('coreBOSSessionExpiredEvent', {});
 
