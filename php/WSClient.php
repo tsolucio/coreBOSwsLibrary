@@ -469,6 +469,82 @@ class Vtiger_WSClient {
 	}
 
 	/**
+	 * Do Mass Create Operation
+	 */
+	public function doMassUpsert($elements) {
+		// Perform re-login if required.
+		$this->__checkLogin();
+
+		$postdata = array(
+			'operation'   => 'MassCreate',
+			'sessionName' => $this->_sessionid,
+			'elements'    => json_encode($elements)
+		);
+		$resultdata = $this->_client->doPost($postdata, true);
+		if ($this->hasError($resultdata)) {
+			return false;
+		}
+		return $resultdata['result'];
+	}
+
+	/**
+	 * Do Mass Retrieve Operation
+	 */
+	public function doMassRetrieve($ids) {
+		// Perform re-login if required.
+		$this->__checkLogin();
+
+		$postdata = array(
+			'operation'   => 'MassRetrieve',
+			'sessionName' => $this->_sessionid,
+			'ids'         => $ids
+		);
+		$resultdata = $this->_client->doPost($postdata, true);
+		if ($this->hasError($resultdata)) {
+			return false;
+		}
+		return $resultdata['result'];
+	}
+
+	/**
+	 * Do Mass Update Operation
+	 */
+	public function doMassUpdate($elements) {
+		// Perform re-login if required.
+		$this->__checkLogin();
+
+		$postdata = array(
+			'operation'   => 'MassUpdate',
+			'sessionName' => $this->_sessionid,
+			'elements'    => json_encode($elements)
+		);
+		$resultdata = $this->_client->doPost($postdata, true);
+		if ($this->hasError($resultdata)) {
+			return false;
+		}
+		return $resultdata['result'];
+	}
+
+	/**
+	 * Do Mass Delete Operation
+	 */
+	public function doMassDelete($ids) {
+		// Perform re-login if required.
+		$this->__checkLogin();
+
+		$postdata = array(
+			'operation'   => 'MassDelete',
+			'sessionName' => $this->_sessionid,
+			'ids'         => $ids
+		);
+		$resultdata = $this->_client->doPost($postdata, true);
+		if ($this->hasError($resultdata)) {
+			return false;
+		}
+		return $resultdata['result'];
+	}
+
+	/**
 	 * Invoke custom operation
 	 *
 	 * @param String $method Name of the webservice to invoke
