@@ -452,6 +452,32 @@ export function doRetrieve(record) {
 }
 
 /**
+ * Mass Upsert Operation
+ */
+ export function doMassUpsert(elements) {
+	// reqtype = 'POST';
+	let postdata = 'operation=MassCreate&sessionName=' + _sessionid + '&elements=' + JSON.stringify(elements);
+	fetchOptions.body = postdata;
+	fetchOptions.method = 'post';
+	return fetch(_serviceurl, fetchOptions)
+		.then(status)
+		.then(getData)
+		.then(function (data) {
+			if (hasError(data) === false) {
+				return Promise.resolve(data['result']);
+			} else {
+				if (sessionValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}
+				return Promise.reject(new Error('incorrect response: '+lastError()));
+			}
+		})
+		.catch(function (error) {
+			return Promise.reject(error);
+		});
+}
+
+/**
  * Mass Retrieve Operation
  */
 export function doMassRetrieve(ids) {
