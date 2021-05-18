@@ -187,6 +187,15 @@ function execQuery(resource, params, additionalWhereClause, searchFields) {
         })
 }
 
+export const appendPagination = (page, perPage) => {
+    page = page || 1;
+    return ' limit ' + ((page - 1) * perPage) + ',' + perPage;
+};
+
+export const appendOrder = (field, order) => {
+    return ' order by ' + field + ' ' + order;
+};
+
 export default {
     getList: async (resource, params, additionalWhereClause, additionalFields) => {
         params = {
