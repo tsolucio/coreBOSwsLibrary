@@ -147,32 +147,53 @@ function convertFilter2Query(filter, joinCondition = 'OR') {
     return (search === '' ? '' : ' where ( ' + search + ' ) ');
 }
 
-function execQuery(resource, params) {
+function execQuery(resource, params, additionalWhereClause, searchFields) {
     let query = '';
-    query = 'select * from '+resource;
+    let where = ''
+    searchFields = searchFields ?? '*';
+    query = `select ${searchFields} from ${resource}`;
+   
     if (params.filter && Object.keys(params.filter).length) {
-        query += convertFilter2Query(params.filter);
+        where = convertFilter2Query(params.filter, params.joinCondition ?? 'OR');
     }
+    
+    if (!additionalWhereClause) {
+        query += where;
+    } else {
+        query += where !== '' ? where + " and " + additionalWhereClause : ' where ' + additionalWhereClause;
+    }
+
+
     let { field, order } = params.sort;
     field = field || '';
     order = order || '';
     if (field !== '') {
-        query += ' order by ' + field + ' ' + order;
+        query += appendOrder(field, order);
     }
+    
     let { page, perPage } = params.pagination;
     if (perPage) {
         // perPage = perPage || 25;
         page = page || 1;
-        query += ' limit ' + ((page - 1) * perPage) + ',' + perPage;
+        query += appendPagination(page, perPage);
     }
+
     query = encodeURIComponent(query);
     return cbconn.doQueryWithTotal(query)
-        .then((data) => { return { 'data': data.result, 'total': Number(data.totalrows) } });
+        .then((data) => {
+            return { 'data': data.result, 'total': Number(data.totalrows) }
+        }).catch((er) => { 
+           return { data: [], total: 0 }
+        })
 }
 
 export default {
-    getList: async (resource, params) => {
-        return execQuery(resource, params)
+    getList: async (resource, params, additionalWhereClause, additionalFields) => {
+        params = {
+            ...params,
+            joinCondition: 'AND'
+        };
+        return execQuery(resource, params, additionalWhereClause, additionalFields)
     },
 
     getOne: (resource, params) =>
@@ -184,7 +205,9 @@ export default {
         cbconn.doMassRetrieve(params.ids)
             .then((data) => {
                 let d = [];
-                Object.keys(data).forEach((key, val) => d.push(val));
+                for (const value of Object.values(data)) {
+                    d.push(value);
+                }
                 return { 'data': d }
             }),
 
