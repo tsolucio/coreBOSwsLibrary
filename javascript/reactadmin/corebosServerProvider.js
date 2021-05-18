@@ -7,7 +7,7 @@ if (!logdata) {
     cbconn.setSession(JSON.parse(logdata));
 }
 
-function convertFilter2Query(filter) {
+function convertFilter2Query(filter, joinCondition = 'OR') {
     let search = '';
     if (!Array.isArray(filter)) { // react admin filter format
         if (typeof filter == 'object') {
@@ -26,7 +26,7 @@ function convertFilter2Query(filter) {
                                     'operation':'contains',
                                     'value':value,
                                     'valuetype':'raw',
-                                    'joincondition':'or',
+                                    'joincondition': joinCondition,
                                     'groupid':'racblegrp'+grprand,
                                     'groupjoin':'and'
                                 }
@@ -38,7 +38,7 @@ function convertFilter2Query(filter) {
                             'operation':'contains',
                             'value':value,
                             'valuetype':'raw',
-                            'joincondition':'or',
+                            'joincondition': joinCondition,
                             'groupid':'racblgroup',
                             'groupjoin':'and'
                         }];
@@ -51,7 +51,7 @@ function convertFilter2Query(filter) {
                         'operation':'contains',
                         'value':value,
                         'valuetype':'raw',
-                        'joincondition':'or',
+                        'joincondition': joinCondition,
                         'groupid':'ragroup',
                         'groupjoin':'and'
                     }];
@@ -144,7 +144,7 @@ function convertFilter2Query(filter) {
         prevglue = cond.glue;
     }
     search += (search==='' ? group : ' ' + apglue + ' (' + group + ')');
-    return (search==='' ? '' : ' where' + search);
+    return (search === '' ? '' : ' where ( ' + search + ' ) ');
 }
 
 function execQuery(resource, params) {
