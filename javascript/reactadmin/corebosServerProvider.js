@@ -7,7 +7,7 @@ if (!logdata) {
     cbconn.setSession(JSON.parse(logdata));
 }
 
-function convertFilter2Query(filter, joinCondition = 'OR') {
+function convertFilter2Query(filter, joinCondition = 'OR', resource) {
     let search = '';
     if (!Array.isArray(filter)) { // react admin filter format
         if (typeof filter == 'object') {
@@ -46,10 +46,15 @@ function convertFilter2Query(filter, joinCondition = 'OR') {
                 } else if (key.substr(0, 15)==='cbfiltersearch_') {
                     nsrch = JSON.parse(value);
                 } else {
+                    const fields = window.coreBOS.Describe[resource]?.fields??[];
+                     const keyField = fields.filter((field) => field.name === key)[0]??{};
+                     const refTo = (keyField && keyField.type && keyField.type.refersTo) ? keyField.type.refersTo[0] : '';
+                     const fieldName = (keyField && keyField.uitype === "10") ? `${key} : (${refTo}) id` : key;
+                     const valueID = value?.split('x')[1]??value;
                     nsrch = [{
-                        'fieldname':key,
+                        'fieldname':fieldName,
                         'operation':'contains',
-                        'value':value,
+                        'value':valueID,
                         'valuetype':'raw',
                         'joincondition': joinCondition,
                         'groupid':'ragroup',
@@ -154,7 +159,7 @@ function execQuery(resource, params, additionalWhereClause, searchFields) {
     query = `select ${searchFields} from ${resource}`;
    
     if (params.filter && Object.keys(params.filter).length) {
-        where = convertFilter2Query(params.filter, params.joinCondition ?? 'OR');
+        where = convertFilter2Query(params.filter, params.joinCondition ?? 'OR', resource);
     }
     
     if (!additionalWhereClause) {
