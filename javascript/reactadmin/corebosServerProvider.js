@@ -1,11 +1,11 @@
 import * as cbconn from 'corebos-ws-lib/WSClientm';
 
-const logdata = localStorage.getItem('coreboslogindata');
+/* const logdata = localStorage.getItem('coreboslogindata');
 if (!logdata) {
     cbconn.doLogin('admin', 'admin', true);
 } else {
     cbconn.setSession(JSON.parse(logdata));
-}
+} */
 
 function convertFilter2Query(filter, joinCondition = 'OR', resource) {
     let search = '';
@@ -200,6 +200,8 @@ export const appendPagination = (page, perPage) => {
 export const appendOrder = (field, order) => {
     return ' order by ' + field + ' ' + order;
 };
+
+/* eslint-disable import/no-anonymous-default-export */
 
 export default {
     getList: async (resource, params, additionalWhereClause, additionalFields) => {
