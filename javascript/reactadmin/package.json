@@ -1,6 +1,6 @@
 {
   "name": "react-admin-corebos",
-  "version": "0.9.4",
+  "version": "0.9.5",
   "description": "coreBOS web service data provider for react-admin",
   "main": "corebosServerProvider.js",
   "scripts": {
