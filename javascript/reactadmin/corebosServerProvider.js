@@ -237,7 +237,7 @@ export default {
     ,
 
     updateMany: (resource, params) =>
-        cbconn.doInvoke('MassUpdate', JSON.stringify(params.data))
+        cbconn.doInvoke('MassUpdate', {'elements': JSON.stringify(params.data)}, 'POST')
             .then((data) => { return { 'data': data } })
     ,
 
