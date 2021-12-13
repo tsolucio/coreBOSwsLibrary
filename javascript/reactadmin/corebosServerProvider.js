@@ -157,7 +157,7 @@ function convertFilter2Query(filter, joinCondition = 'OR', resource, relatedModu
         prevglue = cond.glue;
     }
     search += (search==='' ? group : ' ' + apglue + ' (' + group + ')');
-    return (search === '' ? '' : ' where ( ' + search + ' ) ');
+    return (search === '' ? '' : ' where (' + search + ') ');
 }
 
 function execQuery(resource, params, additionalWhereClause, searchFields) {
