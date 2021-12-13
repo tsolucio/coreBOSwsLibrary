@@ -160,14 +160,24 @@ function convertFilter2Query(filter, joinCondition = 'OR', resource, relatedModu
     return (search === '' ? '' : ' where (' + search + ') ');
 }
 
-function execQuery(resource, params, additionalWhereClause, searchFields) {
+function execQuery(resource, quesrParams, additionalWhereClause, searchFields) {
     let query = '';
     let where = ''
     searchFields = searchFields ?? '*';
     query = `select ${searchFields} from ${resource}`;
    
-    if (params.filter && Object.keys(params.filter).length) {
-        where = convertFilter2Query(params.filter, params.joinCondition ?? 'OR', resource);
+    const { filter, ...params } = quesrParams;
+    if (filter && Object.keys(filter).length) {
+        let { relatedModule, moduleRelationType, joinCondition, ...restFilters } = filter;
+        let filters;
+        if(moduleRelationType && moduleRelationType === 'N:N'){
+            filters = Object.entries(restFilters).map((arrKey) => {
+                return ( { field: arrKey[0] ? arrKey[0] : `Related.${relatedModule}`, value: arrKey[1], operation: 'equal', glue: joinCondition ?? 'OR', group: 1 } );
+            });
+        } else {
+            filters = restFilters;
+        }
+        where = convertFilter2Query(filters, params.joinCondition ?? 'OR', resource, relatedModule);
     }
     
     if (!additionalWhereClause) {
