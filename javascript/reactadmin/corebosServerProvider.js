@@ -94,6 +94,9 @@ function convertFilter2Query(filter, joinCondition = 'OR', resource, relatedModu
         }
         let op = '';
         switch (cond.operation) {
+            case 'equal':
+                op = `${cond.field} = '${cond.value}'`;
+                break;
             case 'like':
                 op = `${cond.field} like '%${cond.value}%'`;
                 break;
