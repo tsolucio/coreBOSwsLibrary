@@ -7,7 +7,7 @@ if (!logdata) {
     cbconn.setSession(JSON.parse(logdata));
 } */
 
-function convertFilter2Query(filter, joinCondition = 'OR', resource) {
+function convertFilter2Query(filter, joinCondition = 'OR', resource, relatedModule='') {
     let search = '';
     if (!Array.isArray(filter)) { // react admin filter format
         if (typeof filter == 'object') {
@@ -47,10 +47,15 @@ function convertFilter2Query(filter, joinCondition = 'OR', resource) {
                     nsrch = JSON.parse(value);
                 } else {
                     const fields = window.coreBOS.Describe[resource]?.fields??[];
-                     const keyField = fields.filter((field) => field.name === key)[0]??{};
-                     const refTo = (keyField && keyField.type && keyField.type.refersTo) ? keyField.type.refersTo[0] : '';
-                     const fieldName = (keyField && keyField.uitype === "10") ? `${key} : (${refTo}) id` : key;
-                     const valueID = value?.split('x')[1]??value;
+                    const keyField = fields.filter((field) => field.name === key)[0]??{};
+                    let refTo = '';
+                    if(relatedModule){
+                    refTo = relatedModule;
+                    } else {
+                    refTo = (keyField && keyField.type && keyField.type.refersTo) ? keyField.type.refersTo[0] : '';
+                    }
+                    const fieldName = (keyField && keyField.uitype === "10") ? `${key} : (${refTo}) id` : key;
+                    const valueID = value?.split('x')[1]??value;
                     nsrch = [{
                         'fieldname':fieldName,
                         'operation':'contains',
