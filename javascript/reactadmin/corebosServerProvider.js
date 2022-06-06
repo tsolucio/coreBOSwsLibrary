@@ -7,7 +7,7 @@ if (!logdata) {
     cbconn.setSession(JSON.parse(logdata));
 } */
 
-function convertFilter2Query(filter, joinCondition = 'OR', resource) {
+function convertFilter2Query(filter, joinCondition = 'OR', resource, relatedModule='') {
     let search = '';
     if (!Array.isArray(filter)) { // react admin filter format
         if (typeof filter == 'object') {
@@ -47,10 +47,15 @@ function convertFilter2Query(filter, joinCondition = 'OR', resource) {
                     nsrch = JSON.parse(value);
                 } else {
                     const fields = window.coreBOS.Describe[resource]?.fields??[];
-                     const keyField = fields.filter((field) => field.name === key)[0]??{};
-                     const refTo = (keyField && keyField.type && keyField.type.refersTo) ? keyField.type.refersTo[0] : '';
-                     const fieldName = (keyField && keyField.uitype === "10") ? `${key} : (${refTo}) id` : key;
-                     const valueID = value?.split('x')[1]??value;
+                    const keyField = fields.filter((field) => field.name === key)[0]??{};
+                    let refTo = '';
+                    if(relatedModule){
+                    refTo = relatedModule;
+                    } else {
+                    refTo = (keyField && keyField.type && keyField.type.refersTo) ? keyField.type.refersTo[0] : '';
+                    }
+                    const fieldName = (keyField && keyField.uitype === "10") ? `${key} : (${refTo}) id` : key;
+                    const valueID = value?.split('x')[1]??value;
                     nsrch = [{
                         'fieldname':fieldName,
                         'operation':'contains',
@@ -89,6 +94,9 @@ function convertFilter2Query(filter, joinCondition = 'OR', resource) {
         }
         let op = '';
         switch (cond.operation) {
+            case 'equal':
+                op = `${cond.field} = '${cond.value}'`;
+                break;
             case 'like':
                 op = `${cond.field} like '%${cond.value}%'`;
                 break;
@@ -149,17 +157,27 @@ function convertFilter2Query(filter, joinCondition = 'OR', resource) {
         prevglue = cond.glue;
     }
     search += (search==='' ? group : ' ' + apglue + ' (' + group + ')');
-    return (search === '' ? '' : ' where ( ' + search + ' ) ');
+    return (search === '' ? '' : ' where (' + search + ') ');
 }
 
-function execQuery(resource, params, additionalWhereClause, searchFields) {
+function execQuery(resource, quesrParams, additionalWhereClause, searchFields) {
     let query = '';
     let where = ''
     searchFields = searchFields ?? '*';
     query = `select ${searchFields} from ${resource}`;
    
-    if (params.filter && Object.keys(params.filter).length) {
-        where = convertFilter2Query(params.filter, params.joinCondition ?? 'OR', resource);
+    const { filter, ...params } = quesrParams;
+    if (filter && Object.keys(filter).length) {
+        let { relatedModule, moduleRelationType, joinCondition, ...restFilters } = filter;
+        let filters;
+        if(moduleRelationType && moduleRelationType === 'N:N'){
+            filters = Object.entries(restFilters).map((arrKey) => {
+                return ( { field: arrKey[0] ? arrKey[0] : `Related.${relatedModule}`, value: arrKey[1], operation: 'equal', glue: joinCondition ?? 'OR', group: 1 } );
+            });
+        } else {
+            filters = restFilters;
+        }
+        where = convertFilter2Query(filters, params.joinCondition ?? 'OR', resource, relatedModule);
     }
     
     if (!additionalWhereClause) {
