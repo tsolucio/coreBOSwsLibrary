@@ -39,11 +39,20 @@ var fetchOptions = {
 	}
 };
 
-export function setURL(cburl) {
+export function setURL(cburl, fetchingOptions=null) {
 	if (cburl!=='') {
 		// Format the url before appending servicebase
 		_serviceurl = cburl + (cburl.substr(cburl.length - 1) == '/' ? '' : '/') + _servicebase;
 	}
+	if(fetchingOptions){
+		console.log('fetchingOptions', fetchingOptions);
+		_setFetchOptions(fetchingOptions);
+	}
+}
+
+function _setFetchOptions({mode, headers}) {
+	fetchOptions.mode = mode;
+	fetchOptions.headers = headers;
 }
 
 export function setSession(logindata) {
