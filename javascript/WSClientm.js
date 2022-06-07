@@ -35,7 +35,8 @@ var version = 'coreBOS2.1';
 var fetchOptions = {
 	mode: 'cors',
 	headers: {
-		'Content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
+		'Content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+		'corebos-authorization': _sessionid,
 	}
 };
 
@@ -58,6 +59,9 @@ function _setFetchOptions({mode, headers}) {
 export function setSession(logindata) {
 	_sessionid = logindata.sessionName;
 	_userid = logindata.userId;
+	if(fetchOptions && fetchOptions.headers){
+		fetchOptions.headers["corebos-authorization"] = logindata.sessionName;
+	}
 }
 
 export function getSession() {
