@@ -60,7 +60,7 @@ export function setSession(logindata) {
 	_sessionid = logindata.sessionName;
 	_userid = logindata.userId;
 	if(fetchOptions && fetchOptions.headers){
-		fetchOptions.headers["corebos-authorization"] = logindata.sessionName;
+		fetchOptions.headers["corebos_authorization"] = logindata.sessionName;
 	}
 }
 
