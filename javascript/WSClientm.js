@@ -35,14 +35,15 @@ var version = 'coreBOS2.1';
 var fetchOptions = {
 	mode: 'cors',
 	headers: {
-		'Content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
+		'Content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+		'corebos-authorization': _sessionid,
 	}
 };
 
 export function setURL(cburl, fetchingOptions=null) {
 	if (cburl!=='') {
 		// Format the url before appending servicebase
-		_serviceurl = cburl + (cburl.substr(cburl.length - 1) == '/' ? '' : '/') + _servicebase;
+		_serviceurl = cburl + (cburl.substr(cburl.length - 1) === '/' ? '' : '/') + _servicebase;
 	}
 	if(fetchingOptions){
 		console.log('fetchingOptions', fetchingOptions);
@@ -58,6 +59,9 @@ function _setFetchOptions({mode, headers}) {
 export function setSession(logindata) {
 	_sessionid = logindata.sessionName;
 	_userid = logindata.userId;
+	if(fetchOptions && fetchOptions.headers){
+		fetchOptions.headers["corebos-authorization"] = logindata.sessionName;
+	}
 }
 
 export function getSession() {
@@ -251,7 +255,7 @@ export async function doLoginPortal(username, password, hashmethod, entity) {
  */
 export function doLogout() {
 	// reqtype = 'POST';
-	let postdata = 'operation=logout&sessionName=' + _sessionid;
+	let postdata = 'operation=logout';
 	fetchOptions.body = postdata;
 	fetchOptions.method = 'post';
 	return fetch(_serviceurl, fetchOptions)
@@ -307,7 +311,7 @@ export function doQuery(query) {
 	}
 
 	// reqtype = 'GET';
-	let params = '?operation=query&sessionName=' + _sessionid + '&query=' + query;
+	let params = '?operation=query&query=' + query;
 	fetchOptions.method = 'get';
 	delete fetchOptions.body;
 	return fetch(_serviceurl + params, fetchOptions)
@@ -337,7 +341,7 @@ export function doQueryWithTotal(query) {
 	}
 
 	// reqtype = 'GET';
-	let params = '?operation=query&sessionName=' + _sessionid + '&query=' + query;
+	let params = '?operation=query&query=' + query;
 	fetchOptions.method = 'get';
 	delete fetchOptions.body;
 	return fetch(_serviceurl + params, fetchOptions)
@@ -377,7 +381,7 @@ export function getResultColumns(result) {
  */
 export function doListTypes() {
 	// reqtype = 'GET';
-	let params = '?operation=listtypes&sessionName=' + _sessionid;
+	let params = '?operation=listtypes';
 	fetchOptions.method = 'get';
 	delete fetchOptions.body;
 	return fetch(_serviceurl + params, fetchOptions)
@@ -412,7 +416,7 @@ export function doListTypes() {
  */
 export function doDescribe(module) {
 	// reqtype = 'GET';
-	let params = '?operation=describe&sessionName=' + _sessionid + '&elementType=' + module;
+	let params = '?operation=describe&elementType=' + module;
 	fetchOptions.method = 'get';
 	delete fetchOptions.body;
 	return fetch(_serviceurl + params, fetchOptions)
@@ -438,7 +442,7 @@ export function doDescribe(module) {
  */
 export function doRetrieve(record) {
 	// reqtype = 'GET';
-	let params = '?operation=retrieve&sessionName=' + _sessionid + '&id=' + record;
+	let params = '?operation=retrieve&id=' + record;
 	fetchOptions.method = 'get';
 	delete fetchOptions.body;
 	return fetch(_serviceurl + params, fetchOptions)
@@ -464,7 +468,7 @@ export function doRetrieve(record) {
  */
  export function doMassUpsert(elements) {
 	// reqtype = 'POST';
-	let postdata = 'operation=MassCreate&sessionName=' + _sessionid + '&elements=' + JSON.stringify(elements);
+	let postdata = 'operation=MassCreate&elements=' + JSON.stringify(elements);
 	fetchOptions.body = postdata;
 	fetchOptions.method = 'post';
 	return fetch(_serviceurl, fetchOptions)
@@ -490,7 +494,7 @@ export function doRetrieve(record) {
  */
 export function doMassRetrieve(ids) {
 	// reqtype = 'POST';
-	let postdata = 'operation=MassRetrieve&sessionName=' + _sessionid + '&ids=' + ids;
+	let postdata = 'operation=MassRetrieve&ids=' + ids;
 	fetchOptions.body = postdata;
 	fetchOptions.method = 'post';
 	return fetch(_serviceurl, fetchOptions)
@@ -521,7 +525,7 @@ export function doCreate(module, valuemap) {
 	}
 
 	// reqtype = 'POST';
-	let postdata = 'operation=create&sessionName=' + _sessionid + '&elementType=' + module + '&element=' + JSON.stringify(valuemap);
+	let postdata = 'operation=create&elementType=' + module + '&element=' + JSON.stringify(valuemap);
 	fetchOptions.body = postdata;
 	fetchOptions.method = 'post';
 	return fetch(_serviceurl, fetchOptions)
@@ -552,7 +556,7 @@ export function doUpdate(module, valuemap) {
 	}
 
 	// reqtype = 'POST';
-	let postdata = 'operation=update&sessionName=' + _sessionid + '&elementType=' + module + '&element=' + JSON.stringify(valuemap);
+	let postdata = 'operation=update&elementType=' + module + '&element=' + JSON.stringify(valuemap);
 	fetchOptions.body = postdata;
 	fetchOptions.method = 'post';
 	return fetch(_serviceurl, fetchOptions)
@@ -578,7 +582,7 @@ export function doUpdate(module, valuemap) {
  */
 export function doRevise(module, valuemap) {
 	// reqtype = 'POST';
-	let postdata = 'operation=revise&sessionName=' + _sessionid + '&elementType=' + module + '&element=' + JSON.stringify(valuemap);
+	let postdata = 'operation=revise&elementType=' + module + '&element=' + JSON.stringify(valuemap);
 	fetchOptions.body = postdata;
 	fetchOptions.method = 'post';
 	return fetch(_serviceurl, fetchOptions)
@@ -604,7 +608,7 @@ export function doRevise(module, valuemap) {
  */
 export function doDelete(id) {
 	// reqtype = 'POST';
-	let postdata = 'operation=delete&sessionName=' + _sessionid + '&id=' + id;
+	let postdata = 'operation=delete&id=' + id;
 	fetchOptions.body = postdata;
 	fetchOptions.method = 'post';
 	return fetch(_serviceurl, fetchOptions)
@@ -630,7 +634,7 @@ export function doDelete(id) {
  */
 export function doMassDelete(ids) {
 	// reqtype = 'POST';
-	let postdata = 'operation=MassDelete&sessionName=' + _sessionid + '&ids=' + ids;
+	let postdata = 'operation=MassDelete&ids=' + ids;
 	fetchOptions.body = postdata;
 	fetchOptions.method = 'post';
 	return fetch(_serviceurl, fetchOptions)
@@ -664,7 +668,7 @@ export function doInvoke(method, params, type) {
 		reqtype = type.toUpperCase();
 	}
 
-	let postdata = 'operation=' + method + '&sessionName=' + _sessionid;
+	let postdata = 'operation=' + method;
 	for (let key in params) {
 		postdata += '&' + key + '=' + params[key];
 	}
@@ -701,7 +705,7 @@ export function doValidateInformation(record, module, recordInformation) {
 	// reqtype = 'POST';
 	recordInformation.module = recordInformation.module || module;
 	recordInformation.record = recordInformation.record || record;
-	let postdata = 'operation=ValidateInformation&sessionName=' + _sessionid;
+	let postdata = 'operation=ValidateInformation';
 	postdata += '&context=' + JSON.stringify(recordInformation);
 	fetchOptions.body = postdata;
 	fetchOptions.method = 'post';
@@ -725,7 +729,7 @@ export function doValidateInformation(record, module, recordInformation) {
  */
 export function doGetRelatedRecords(record, module, relatedModule, queryParameters) {
 	// reqtype = 'POST';
-	let postdata = 'operation=getRelatedRecords&sessionName=' + _sessionid + '&id=' + record + '&module=' + module;
+	let postdata = 'operation=getRelatedRecords&id=' + record + '&module=' + module;
 	postdata += '&relatedModule=' + relatedModule + '&queryParameters=' + JSON.stringify(queryParameters);
 	fetchOptions.body = postdata;
 	fetchOptions.method = 'post';
@@ -754,7 +758,7 @@ export function doGetRelatedRecords(record, module, relatedModule, queryParamete
  */
 export function doSetRelated(relate_this_id, with_these_ids) {
 	// reqtype = 'POST';
-	let postdata = 'operation=SetRelation&sessionName=' + _sessionid + '&relate_this_id=' + relate_this_id + '&with_these_ids=' + JSON.stringify(with_these_ids);
+	let postdata = 'operation=SetRelation&relate_this_id=' + relate_this_id + '&with_these_ids=' + JSON.stringify(with_these_ids);
 	fetchOptions.body = postdata;
 	fetchOptions.method = 'post';
 	return fetch(_serviceurl, fetchOptions)
@@ -780,7 +784,7 @@ export function doSetRelated(relate_this_id, with_these_ids) {
  */
 export function sessionValidityDetector(error) {
 	//let errorCode = error.split(':')[1]?.trim() ?? '';
-	return (error.success==false && error.error.code == 'INVALID_SESSIONID');
+	return (error.success===false && error.error.code === 'INVALID_SESSIONID');
 }
 
 // MD5 (Message-Digest Algorithm) by WebToolkit
