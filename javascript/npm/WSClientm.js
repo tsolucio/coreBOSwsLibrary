@@ -28,6 +28,8 @@ if (window.coreBOS === undefined) {
 }
 //Session Expiry event
 window.coreBOS.SessionExpired = new CustomEvent('coreBOSSessionExpiredEvent', {});
+//Authorization Required event
+window.coreBOS.AuthorizationRequired = new CustomEvent('coreBOSAuthorizationRequiredEvent', {});
 
 // Version
 var version = 'coreBOS2.1';
@@ -324,6 +326,9 @@ export function doQuery(query) {
 				if (sessionValidityDetector(data)) {
 					window.dispatchEvent(window.coreBOS.SessionExpired);
 				}
+				if (authorizationValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+				}
 				return Promise.reject(new Error('incorrect response: '+lastError()));
 			}
 		})
@@ -353,6 +358,9 @@ export function doQueryWithTotal(query) {
 			} else {
 				if (sessionValidityDetector(data)) {
 					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}
+				if (authorizationValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.AuthorizationRequired);
 				}
 				return Promise.reject(new Error('incorrect response: '+lastError()));
 			}
@@ -403,6 +411,9 @@ export function doListTypes() {
 				if (sessionValidityDetector(data)) {
 					window.dispatchEvent(window.coreBOS.SessionExpired);
 				}
+				if (authorizationValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+				}
 				return Promise.reject(new Error('incorrect response: '+lastError()));
 			}
 		})
@@ -428,6 +439,9 @@ export function doDescribe(module) {
 			} else {
 				if (sessionValidityDetector(data)) {
 					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}
+				if (authorizationValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.AuthorizationRequired);
 				}
 				return Promise.reject(new Error('incorrect response: '+lastError()));
 			}
@@ -455,6 +469,9 @@ export function doRetrieve(record) {
 				if (sessionValidityDetector(data)) {
 					window.dispatchEvent(window.coreBOS.SessionExpired);
 				}
+				if (authorizationValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+				}
 				return Promise.reject(new Error('incorrect response: '+lastError()));
 			}
 		})
@@ -481,6 +498,9 @@ export function doRetrieve(record) {
 				if (sessionValidityDetector(data)) {
 					window.dispatchEvent(window.coreBOS.SessionExpired);
 				}
+				if (authorizationValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+				}
 				return Promise.reject(new Error('incorrect response: '+lastError()));
 			}
 		})
@@ -506,6 +526,9 @@ export function doMassRetrieve(ids) {
 			} else {
 				if (sessionValidityDetector(data)) {
 					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}
+				if (authorizationValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.AuthorizationRequired);
 				}
 				return Promise.reject(new Error('incorrect response: '+lastError()));
 			}
@@ -538,6 +561,9 @@ export function doCreate(module, valuemap) {
 				if (sessionValidityDetector(data)) {
 					window.dispatchEvent(window.coreBOS.SessionExpired);
 				}
+				if (authorizationValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+				}
 				return Promise.reject(new Error('incorrect response: '+lastError()));
 			}
 		})
@@ -569,6 +595,9 @@ export function doUpdate(module, valuemap) {
 				if (sessionValidityDetector(data)) {
 					window.dispatchEvent(window.coreBOS.SessionExpired);
 				}
+				if (authorizationValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+				}
 				return Promise.reject(new Error('incorrect response: '+lastError()));
 			}
 		})
@@ -594,6 +623,9 @@ export function doRevise(module, valuemap) {
 			} else {
 				if (sessionValidityDetector(data)) {
 					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}
+				if (authorizationValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.AuthorizationRequired);
 				}
 				return Promise.reject(new Error('incorrect response: '+lastError()));
 			}
@@ -621,6 +653,9 @@ export function doDelete(id) {
 				if (sessionValidityDetector(data)) {
 					window.dispatchEvent(window.coreBOS.SessionExpired);
 				}
+				if (authorizationValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+				}
 				return Promise.reject(new Error('incorrect response: '+lastError()));
 			}
 		})
@@ -646,6 +681,9 @@ export function doMassDelete(ids) {
 			} else {
 				if (sessionValidityDetector(data)) {
 					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}
+				if (authorizationValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.AuthorizationRequired);
 				}
 				return Promise.reject(new Error('incorrect response: '+lastError()));
 			}
@@ -689,6 +727,9 @@ export function doInvoke(method, params, type) {
 			} else {
 				if (sessionValidityDetector(data)) {
 					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}
+				if (authorizationValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.AuthorizationRequired);
 				}
 				return Promise.reject(new Error('incorrect response: '+lastError()));
 			}
@@ -743,6 +784,9 @@ export function doGetRelatedRecords(record, module, relatedModule, queryParamete
 				if (sessionValidityDetector(data)) {
 					window.dispatchEvent(window.coreBOS.SessionExpired);
 				}
+				if (authorizationValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+				}
 				return Promise.reject(new Error('incorrect response: '+lastError()));
 			}
 		})
@@ -771,12 +815,23 @@ export function doSetRelated(relate_this_id, with_these_ids) {
 				if (sessionValidityDetector(data)) {
 					window.dispatchEvent(window.coreBOS.SessionExpired);
 				}
+				if (authorizationValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+				}
 				return Promise.reject(new Error('incorrect response: '+lastError()));
 			}
 		})
 		.catch(function (error) {
 			return Promise.reject(error);
 		});
+}
+
+/**
+ * Authorization Validity detector/Checker
+ */
+ export function authorizationValidityDetector(error) {
+	//let errorCode = error.split(':')[1]?.trim() ?? '';
+	return (error.success===false && error.error.code === 'AUTHENTICATION_REQUIRED');
 }
 
 /**
