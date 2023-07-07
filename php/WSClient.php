@@ -476,9 +476,9 @@ class Vtiger_WSClient {
 		$this->checkLogin();
 
 		$postdata = array(
-			'operation'   => 'MassCreate',
+			'operation' => 'MassCreate',
 			'sessionName' => $this->_sessionid,
-			'elements'    => json_encode($elements)
+			'elements' => json_encode($elements)
 		);
 		$resultdata = $this->_client->doPost($postdata, true);
 		if ($this->hasError($resultdata)) {
@@ -495,9 +495,9 @@ class Vtiger_WSClient {
 		$this->checkLogin();
 
 		$postdata = array(
-			'operation'   => 'MassRetrieve',
+			'operation' => 'MassRetrieve',
 			'sessionName' => $this->_sessionid,
-			'ids'         => $ids
+			'ids' => $ids
 		);
 		$resultdata = $this->_client->doPost($postdata, true);
 		if ($this->hasError($resultdata)) {
@@ -514,9 +514,9 @@ class Vtiger_WSClient {
 		$this->checkLogin();
 
 		$postdata = array(
-			'operation'   => 'MassUpdate',
+			'operation' => 'MassUpdate',
 			'sessionName' => $this->_sessionid,
-			'elements'    => json_encode($elements)
+			'elements' => json_encode($elements)
 		);
 		$resultdata = $this->_client->doPost($postdata, true);
 		if ($this->hasError($resultdata)) {
@@ -533,9 +533,9 @@ class Vtiger_WSClient {
 		$this->checkLogin();
 
 		$postdata = array(
-			'operation'   => 'MassDelete',
+			'operation' => 'MassDelete',
 			'sessionName' => $this->_sessionid,
-			'ids'         => $ids
+			'ids' => $ids
 		);
 		$resultdata = $this->_client->doPost($postdata, true);
 		if ($this->hasError($resultdata)) {
