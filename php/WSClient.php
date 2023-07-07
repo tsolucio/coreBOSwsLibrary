@@ -118,7 +118,7 @@ class Vtiger_WSClient {
 	 * Perform the challenge
 	 * @access private
 	 */
-	private function __doChallenge($username) {
+	private function doChallenge($username) {
 		$getdata = array(
 			'operation' => 'getchallenge',
 			'username' => $username
@@ -138,7 +138,7 @@ class Vtiger_WSClient {
 	/**
 	 * Check and perform login if requried.
 	 */
-	private function __checkLogin() {
+	private function checkLogin() {
 		/*if($this->_expiretime || (time() > $this->_expiretime)) {
 			$this->doLogin($this->_serviceuser, $this->_servicepwd);
 		}*/
@@ -149,7 +149,7 @@ class Vtiger_WSClient {
 	 */
 	public function doLogin($username, $userAccesskey, $withpassword = false) {
 		// Do the challenge before login
-		if ($this->__doChallenge($username) === false) {
+		if ($this->doChallenge($username) === false) {
 			return false;
 		}
 
@@ -175,7 +175,7 @@ class Vtiger_WSClient {
 	 * Do Login Portal Operation
 	 */
 	public function doLoginPortal($username, $password, $passwordhash = 'md5', $entity = 'Contacts') {
-		if ($this->__doChallenge($username) === false) {
+		if ($this->doChallenge($username) === false) {
 			return false;
 		}
 		switch ($passwordhash) {
@@ -217,7 +217,7 @@ class Vtiger_WSClient {
 	 * Do Login Session Operation
 	 */
 	public function doLoginSession($username, $loggedinat, $pkey, $sessionid) {
-		if ($this->__doChallenge($username) === false) {
+		if ($this->doChallenge($username) === false) {
 			return false;
 		}
 		$getdata = array(
@@ -235,7 +235,7 @@ class Vtiger_WSClient {
 	* Do Logout Operation.
 	*/
 	public function doLogout() {
-		$this->__checkLogin();
+		$this->checkLogin();
 		$postdata = array(
 			'operation' => 'logout',
 			'sessionName' => $this->_sessionid
@@ -252,7 +252,7 @@ class Vtiger_WSClient {
 	 */
 	public function doQuery($query) {
 		// Perform re-login if required.
-		$this->__checkLogin();
+		$this->checkLogin();
 
 		// Make sure the query ends with ;
 		$query = trim($query);
@@ -292,7 +292,7 @@ class Vtiger_WSClient {
 	 */
 	public function doListTypes($fieldTypeList = '') {
 		// Perform re-login if required.
-		$this->__checkLogin();
+		$this->checkLogin();
 
 		if (is_array($fieldTypeList)) {
 			$fieldTypeList = json_encode($fieldTypeList);
@@ -320,7 +320,7 @@ class Vtiger_WSClient {
 	 */
 	public function doDescribe($module) {
 		// Perform re-login if required.
-		$this->__checkLogin();
+		$this->checkLogin();
 
 		$getdata = array(
 			'operation' => 'describe',
@@ -339,7 +339,7 @@ class Vtiger_WSClient {
 	 */
 	public function doRetrieve($record) {
 		// Perform re-login if required.
-		$this->__checkLogin();
+		$this->checkLogin();
 
 		$getdata = array(
 			'operation' => 'retrieve',
@@ -358,7 +358,7 @@ class Vtiger_WSClient {
 	 */
 	public function doCreate($module, $valuemap) {
 		// Perform re-login if required.
-		$this->__checkLogin();
+		$this->checkLogin();
 
 		// Assign record to logged in user if not specified
 		if (!isset($valuemap['assigned_user_id'])) {
@@ -380,7 +380,7 @@ class Vtiger_WSClient {
 
 	public function doUpdate($module, $valuemap) {
 		// Perform re-login if required.
-		$this->__checkLogin();
+		$this->checkLogin();
 
 		// Assign record to logged in user if not specified
 		if (!isset($valuemap['assigned_user_id'])) {
@@ -402,7 +402,7 @@ class Vtiger_WSClient {
 
 	public function doRevise($module, $valuemap) {
 		// Perform re-login if required.
-		$this->__checkLogin();
+		$this->checkLogin();
 
 		// Assign record to logged in user if not specified
 		if (!isset($valuemap['assigned_user_id'])) {
@@ -427,7 +427,7 @@ class Vtiger_WSClient {
 	*/
 	public function doDelete($record) {
 		// Perform re-login if required.
-		$this->__checkLogin();
+		$this->checkLogin();
 
 		$postdata = array(
 			'operation' => 'delete',
@@ -446,7 +446,7 @@ class Vtiger_WSClient {
 	*/
 	public function doUpsert($modulename, $createFields, $searchOn, $updateFields) {
 		// Perform re-login if required.
-		$this->__checkLogin();
+		$this->checkLogin();
 
 		// Assign record to logged in user if not specified
 		if (!isset($createFields['assigned_user_id'])) {
@@ -473,7 +473,7 @@ class Vtiger_WSClient {
 	 */
 	public function doMassUpsert($elements) {
 		// Perform re-login if required.
-		$this->__checkLogin();
+		$this->checkLogin();
 
 		$postdata = array(
 			'operation'   => 'MassCreate',
@@ -492,7 +492,7 @@ class Vtiger_WSClient {
 	 */
 	public function doMassRetrieve($ids) {
 		// Perform re-login if required.
-		$this->__checkLogin();
+		$this->checkLogin();
 
 		$postdata = array(
 			'operation'   => 'MassRetrieve',
@@ -511,7 +511,7 @@ class Vtiger_WSClient {
 	 */
 	public function doMassUpdate($elements) {
 		// Perform re-login if required.
-		$this->__checkLogin();
+		$this->checkLogin();
 
 		$postdata = array(
 			'operation'   => 'MassUpdate',
@@ -530,7 +530,7 @@ class Vtiger_WSClient {
 	 */
 	public function doMassDelete($ids) {
 		// Perform re-login if required.
-		$this->__checkLogin();
+		$this->checkLogin();
 
 		$postdata = array(
 			'operation'   => 'MassDelete',
@@ -553,7 +553,7 @@ class Vtiger_WSClient {
 	 */
 	public function doInvoke($method, $params = null, $type = 'POST') {
 		// Perform re-login if required
-		$this->__checkLogin();
+		$this->checkLogin();
 
 		$senddata = array(
 			'operation' => $method,
@@ -585,7 +585,7 @@ class Vtiger_WSClient {
 	 */
 	public function doGetRelatedRecords($record, $module, $relatedModule, $queryParameters) {
 		// Perform re-login if required.
-		$this->__checkLogin();
+		$this->checkLogin();
 
 		$postdata = array(
 			'operation' => 'getRelatedRecords',
@@ -609,7 +609,7 @@ class Vtiger_WSClient {
 	 */
 	public function doSetRelated($relate_this_id, $with_these_ids) {
 		// Perform re-login if required.
-		$this->__checkLogin();
+		$this->checkLogin();
 
 		$postdata = array(
 			'operation' => 'SetRelation',
