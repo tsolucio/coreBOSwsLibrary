@@ -366,15 +366,15 @@ class Vtiger_WSClient {
 			$valuemap['assigned_user_id'] = $this->_userid;
 		}
 
-		$postdata = array_merge(
-			array(
-				'operation' => 'create',
-				'sessionName' => $this->_sessionid,
-				'elementType' => $module,
-				'element' => json_encode($valuemap),
-			),
-			$this->cbwsOptions,
+		$postdata = array(
+			'operation' => 'create',
+			'sessionName' => $this->_sessionid,
+			'elementType' => $module,
+			'element' => json_encode($valuemap),
 		);
+		if (!empty($this->cbwsOptions)) {
+			$postdata['cbwsOptions'] = $this->cbwsOptions;
+		}
 		$resultdata = $this->_client->doPost($postdata, true);
 		if ($this->hasError($resultdata)) {
 			return false;
