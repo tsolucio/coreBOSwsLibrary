@@ -41,13 +41,13 @@ class Vtiger_WSClient {
 	public $_servicetoken=false;
 
 	// Webservice login credentials
-	public $_sessionid  = false;
-	public $_userid     = false;
-	public $entityid    = '';
-	public $language    = 'en';
+	public $_sessionid = false;
+	public $_userid = false;
+	public $entityid = '';
+	public $language = 'en';
 
 	// Last operation error information
-	public $_lasterror  = false;
+	public $_lasterror = false;
 
 	// Version
 	public $wsclient_version = 'coreBOS2.1';
@@ -121,7 +121,7 @@ class Vtiger_WSClient {
 	private function __doChallenge($username) {
 		$getdata = array(
 			'operation' => 'getchallenge',
-			'username'  => $username
+			'username' => $username
 		);
 		$resultdata = $this->_client->doGet($getdata, true);
 
@@ -129,8 +129,8 @@ class Vtiger_WSClient {
 			return false;
 		}
 
-		$this->_servertime   = $resultdata['result']['serverTime'];
-		$this->_expiretime   = $resultdata['result']['expireTime'];
+		$this->_servertime = $resultdata['result']['serverTime'];
+		$this->_expiretime = $resultdata['result']['expireTime'];
 		$this->_servicetoken = $resultdata['result']['token'];
 		return true;
 	}
@@ -155,7 +155,7 @@ class Vtiger_WSClient {
 
 		$postdata = array(
 			'operation' => 'login',
-			'username'  => $username,
+			'username' => $username,
 			'accessKey' => ($withpassword ? $this->_servicetoken.$userAccesskey : md5($this->_servicetoken.$userAccesskey))
 		);
 		$resultdata = $this->_client->doPost($postdata, true);
@@ -164,10 +164,10 @@ class Vtiger_WSClient {
 			return false;
 		}
 		$this->_serviceuser = $username;
-		$this->_servicekey  = $userAccesskey;
+		$this->_servicekey = $userAccesskey;
 
 		$this->_sessionid = $resultdata['result']['sessionName'];
-		$this->_userid    = $resultdata['result']['userId'];
+		$this->_userid = $resultdata['result']['userId'];
 		return true;
 	}
 
@@ -262,8 +262,8 @@ class Vtiger_WSClient {
 
 		$getdata = array(
 			'operation' => 'query',
-			'sessionName'  => $this->_sessionid,
-			'query'  => $query
+			'sessionName' => $this->_sessionid,
+			'query' => $query
 		);
 		$resultdata = $this->_client->doGet($getdata, true);
 
@@ -299,7 +299,7 @@ class Vtiger_WSClient {
 		}
 		$getdata = array(
 			'operation' => 'listtypes',
-			'sessionName'  => $this->_sessionid,
+			'sessionName' => $this->_sessionid,
 			'fieldTypeList' => $fieldTypeList
 		);
 		$resultdata = $this->_client->doGet($getdata, true);
@@ -310,7 +310,7 @@ class Vtiger_WSClient {
 
 		$returnvalue = array();
 		foreach ($modulenames as $modulename) {
-			$returnvalue[$modulename] = array ( 'name' => $modulename );
+			$returnvalue[$modulename] = array('name' => $modulename);
 		}
 		return $returnvalue;
 	}
@@ -324,7 +324,7 @@ class Vtiger_WSClient {
 
 		$getdata = array(
 			'operation' => 'describe',
-			'sessionName'  => $this->_sessionid,
+			'sessionName' => $this->_sessionid,
 			'elementType' => $module
 		);
 		$resultdata = $this->_client->doGet($getdata, true);
@@ -343,7 +343,7 @@ class Vtiger_WSClient {
 
 		$getdata = array(
 			'operation' => 'retrieve',
-			'sessionName'  => $this->_sessionid,
+			'sessionName' => $this->_sessionid,
 			'id' => $record
 		);
 		$resultdata = $this->_client->doGet($getdata, true);
@@ -366,10 +366,10 @@ class Vtiger_WSClient {
 		}
 
 		$postdata = array(
-			'operation'   => 'create',
+			'operation' => 'create',
 			'sessionName' => $this->_sessionid,
 			'elementType' => $module,
-			'element'     => json_encode($valuemap)
+			'element' => json_encode($valuemap)
 		);
 		$resultdata = $this->_client->doPost($postdata, true);
 		if ($this->hasError($resultdata)) {
@@ -388,10 +388,10 @@ class Vtiger_WSClient {
 		}
 
 		$postdata = array(
-			'operation'   => 'update',
+			'operation' => 'update',
 			'sessionName' => $this->_sessionid,
 			'elementType' => $module,
-			'element'     => json_encode($valuemap)
+			'element' => json_encode($valuemap)
 		);
 		$resultdata = $this->_client->doPost($postdata, true);
 		if ($this->hasError($resultdata)) {
@@ -410,10 +410,10 @@ class Vtiger_WSClient {
 		}
 
 		$postdata = array(
-			'operation'   => 'revise',
+			'operation' => 'revise',
 			'sessionName' => $this->_sessionid,
 			'elementType' => $module,
-			'element'     => json_encode($valuemap)
+			'element' => json_encode($valuemap)
 		);
 		$resultdata = $this->_client->doPost($postdata, true);
 		if ($this->hasError($resultdata)) {
@@ -430,9 +430,9 @@ class Vtiger_WSClient {
 		$this->__checkLogin();
 
 		$postdata = array(
-			'operation'   => 'delete',
+			'operation' => 'delete',
 			'sessionName' => $this->_sessionid,
-			'id'          => $record
+			'id' => $record
 		);
 		$resultdata = $this->_client->doPost($postdata, true);
 		if ($this->hasError($resultdata)) {
@@ -454,7 +454,7 @@ class Vtiger_WSClient {
 		}
 
 		$postdata = array(
-			'operation'   => 'upsert',
+			'operation' => 'upsert',
 			'sessionName' => $this->_sessionid,
 			'elementType' => $modulename,
 			'element' => json_encode($createFields),
