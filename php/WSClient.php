@@ -45,12 +45,13 @@ class Vtiger_WSClient {
 	public $_userid = false;
 	public $entityid = '';
 	public $language = 'en';
+	public $cbwsOptions = [];
 
 	// Last operation error information
 	public $_lasterror = false;
 
 	// Version
-	public $wsclient_version = 'coreBOS2.1';
+	public $wsclient_version = 'coreBOS2.2';
 
 	/**
 	 * Constructor.
@@ -365,11 +366,14 @@ class Vtiger_WSClient {
 			$valuemap['assigned_user_id'] = $this->_userid;
 		}
 
-		$postdata = array(
-			'operation' => 'create',
-			'sessionName' => $this->_sessionid,
-			'elementType' => $module,
-			'element' => json_encode($valuemap)
+		$postdata = array_merge(
+			array(
+				'operation' => 'create',
+				'sessionName' => $this->_sessionid,
+				'elementType' => $module,
+				'element' => json_encode($valuemap),
+			),
+			$this->cbwsOptions,
 		);
 		$resultdata = $this->_client->doPost($postdata, true);
 		if ($this->hasError($resultdata)) {
