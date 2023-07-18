@@ -374,6 +374,7 @@ class Vtiger_WSClient {
 		);
 		if (!empty($this->cbwsOptions)) {
 			$postdata['cbwsOptions'] = $this->cbwsOptions;
+			$this->cbwsOptions = [];
 		}
 		$resultdata = $this->_client->doPost($postdata, true);
 		if ($this->hasError($resultdata)) {
@@ -397,6 +398,10 @@ class Vtiger_WSClient {
 			'elementType' => $module,
 			'element' => json_encode($valuemap)
 		);
+		if (!empty($this->cbwsOptions)) {
+			$postdata['cbwsOptions'] = $this->cbwsOptions;
+			$this->cbwsOptions = [];
+		}
 		$resultdata = $this->_client->doPost($postdata, true);
 		if ($this->hasError($resultdata)) {
 			return false;
@@ -419,6 +424,10 @@ class Vtiger_WSClient {
 			'elementType' => $module,
 			'element' => json_encode($valuemap)
 		);
+		if (!empty($this->cbwsOptions)) {
+			$postdata['cbwsOptions'] = $this->cbwsOptions;
+			$this->cbwsOptions = [];
+		}
 		$resultdata = $this->_client->doPost($postdata, true);
 		if ($this->hasError($resultdata)) {
 			return false;
@@ -465,6 +474,10 @@ class Vtiger_WSClient {
 			'searchOn' => $searchOn,
 			'updatedfields' => implode(',', $updateFields),
 		);
+		if (!empty($this->cbwsOptions)) {
+			$postdata['cbwsOptions'] = $this->cbwsOptions;
+			$this->cbwsOptions = [];
+		}
 		$resultdata = $this->_client->doPost($postdata, true);
 		if ($this->hasError($resultdata)) {
 			return false;
@@ -484,6 +497,10 @@ class Vtiger_WSClient {
 			'sessionName' => $this->_sessionid,
 			'elements' => json_encode($elements)
 		);
+		if (!empty($this->cbwsOptions)) {
+			$postdata['cbwsOptions'] = $this->cbwsOptions;
+			$this->cbwsOptions = [];
+		}
 		$resultdata = $this->_client->doPost($postdata, true);
 		if ($this->hasError($resultdata)) {
 			return false;
@@ -522,6 +539,10 @@ class Vtiger_WSClient {
 			'sessionName' => $this->_sessionid,
 			'elements' => json_encode($elements)
 		);
+		if (!empty($this->cbwsOptions)) {
+			$postdata['cbwsOptions'] = $this->cbwsOptions;
+			$this->cbwsOptions = [];
+		}
 		$resultdata = $this->_client->doPost($postdata, true);
 		if ($this->hasError($resultdata)) {
 			return false;
@@ -569,6 +590,10 @@ class Vtiger_WSClient {
 					$senddata[$k] = $v;
 				}
 			}
+		}
+		if (!empty($this->cbwsOptions)) {
+			$senddata['cbwsOptions'] = $this->cbwsOptions;
+			$this->cbwsOptions = [];
 		}
 
 		$resultdata = false;
