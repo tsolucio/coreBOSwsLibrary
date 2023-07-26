@@ -15,6 +15,7 @@ var _servicetoken=false;
 // Webservice login credentials
 var _sessionid  = false;
 var _userid     = false;
+var _cbwsOptions = [];
 
 // Webservice login user data
 var _entityid = ''
