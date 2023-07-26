@@ -555,7 +555,13 @@ export function doCreate(module, valuemap) {
 	}
 
 	// reqtype = 'POST';
-	let postdata = 'operation=create&elementType=' + module + '&element=' + JSON.stringify(valuemap);
+	let postdata = '';
+	if (_cbwsOptions && _cbwsOptions.length > 0) {
+		postdata = 'operation=create&elementType=' + module + '&element=' + JSON.stringify(valuemap)  + '&cbwsOptions=' + JSON.stringify(_cbwsOptions);
+		_cbwsOptions = [];
+	} else {
+		postdata = 'operation=create&elementType=' + module + '&element=' + JSON.stringify(valuemap);
+	}
 	fetchOptions.body = postdata;
 	fetchOptions.method = 'post';
 	return fetch(_serviceurl, fetchOptions)
@@ -589,7 +595,13 @@ export function doUpdate(module, valuemap) {
 	}
 
 	// reqtype = 'POST';
-	let postdata = 'operation=update&elementType=' + module + '&element=' + JSON.stringify(valuemap);
+	let postdata = '';
+	if (_cbwsOptions && _cbwsOptions.length > 0) {
+		postdata = 'operation=update&elementType=' + module + '&element=' + JSON.stringify(valuemap)  + '&cbwsOptions=' + JSON.stringify(_cbwsOptions);
+		_cbwsOptions = [];
+	} else {
+		postdata = 'operation=update&elementType=' + module + '&element=' + JSON.stringify(valuemap);
+	}
 	fetchOptions.body = postdata;
 	fetchOptions.method = 'post';
 	return fetch(_serviceurl, fetchOptions)
