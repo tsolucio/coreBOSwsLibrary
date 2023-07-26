@@ -630,7 +630,13 @@ export function doUpdate(module, valuemap) {
  */
 export function doRevise(module, valuemap) {
 	// reqtype = 'POST';
-	let postdata = 'operation=revise&elementType=' + module + '&element=' + JSON.stringify(valuemap);
+	let postdata = '';
+	if (_cbwsOptions && _cbwsOptions.length > 0) {
+		postdata = 'operation=revise&elementType=' + module + '&element=' + JSON.stringify(valuemap)  + '&cbwsOptions=' + JSON.stringify(_cbwsOptions);
+		_cbwsOptions = [];
+	} else {
+		postdata = 'operation=revise&elementType=' + module + '&element=' + JSON.stringify(valuemap);
+	}
 	fetchOptions.body = postdata;
 	fetchOptions.method = 'post';
 	return fetch(_serviceurl, fetchOptions)
