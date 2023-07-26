@@ -486,7 +486,13 @@ export function doRetrieve(record) {
  */
  export function doMassUpsert(elements) {
 	// reqtype = 'POST';
-	let postdata = 'operation=MassCreate&elements=' + JSON.stringify(elements);
+	let postdata = '';
+	if (_cbwsOptions && _cbwsOptions.length > 0) {
+		postdata = 'operation=MassCreate&elements=' + JSON.stringify(elements) + '&cbwsOptions=' + JSON.stringify(_cbwsOptions);
+		_cbwsOptions = [];
+	} else {
+		postdata = 'operation=MassCreate&elements=' + JSON.stringify(elements);
+	}
 	fetchOptions.body = postdata;
 	fetchOptions.method = 'post';
 	return fetch(_serviceurl, fetchOptions)
