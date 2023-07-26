@@ -59,6 +59,22 @@ function _setFetchOptions({mode, headers}) {
 	fetchOptions.headers = headers;
 }
 
+/**
+ * valueMapParam = 'elements' || 'element'
+ */
+function addcbWsOptions(operation, valueMap, resource, valueMapParam = 'elements') {
+	let reqData = `operation=${operation}&${valueMapParam}=${JSON.stringify(valueMap)}`;
+	if(resource){
+		reqData += `&elementType=${resource}`;
+	}
+	if (_cbwsOptions && _cbwsOptions.length > 0) {
+		reqData += `&cbwsOptions=${JSON.stringify(_cbwsOptions)}`;
+		_cbwsOptions = [];
+	}
+
+	return reqData;
+}
+
 export function setSession(logindata) {
 	_sessionid = logindata.sessionName;
 	_userid = logindata.userId;
