@@ -730,7 +730,10 @@ export function doInvoke(method, params, type) {
 	if (typeof(type) != 'undefined') {
 		reqtype = type.toUpperCase();
 	}
-
+	if (_cbwsOptions && _cbwsOptions.length > 0) {
+		postdata += '&cbwsOptions=' + JSON.stringify(_cbwsOptions);
+		_cbwsOptions = [];
+	}
 	let postdata = 'operation=' + method;
 	for (let key in params) {
 		postdata += '&' + key + '=' + params[key];
