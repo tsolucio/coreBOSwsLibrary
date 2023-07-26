@@ -15,6 +15,7 @@ var _servicetoken=false;
 // Webservice login credentials
 var _sessionid  = false;
 var _userid     = false;
+var _cbwsOptions = [];
 
 // Webservice login user data
 var _entityid = ''
@@ -56,6 +57,25 @@ export function setURL(cburl, fetchingOptions=null) {
 function _setFetchOptions({mode, headers}) {
 	fetchOptions.mode = mode;
 	fetchOptions.headers = headers;
+}
+
+/**
+ * valueMapParam = 'elements' || 'element'
+ */
+function addcbWsOptions(operation, valueMap=null, resource='', valueMapParam = 'element') {
+	let reqData = `operation=${operation}`;
+	if(valueMap && (typeof valueMap  === 'object' || Array.isArray(valueMap))){
+		reqData += `&${valueMapParam}=${JSON.stringify(valueMap)}`;
+	}
+	if(resource){
+		reqData += `&elementType=${resource}`;
+	}
+	if (_cbwsOptions && _cbwsOptions.length > 0) {
+		reqData += `&cbwsOptions=${JSON.stringify(_cbwsOptions)}`;
+		_cbwsOptions = [];
+	}
+
+	return reqData;
 }
 
 export function setSession(logindata) {
@@ -485,7 +505,7 @@ export function doRetrieve(record) {
  */
  export function doMassUpsert(elements) {
 	// reqtype = 'POST';
-	let postdata = 'operation=MassCreate&elements=' + JSON.stringify(elements);
+	let postdata = addcbWsOptions('MassCreate', elements, '', 'elements');
 	fetchOptions.body = postdata;
 	fetchOptions.method = 'post';
 	return fetch(_serviceurl, fetchOptions)
@@ -548,7 +568,7 @@ export function doCreate(module, valuemap) {
 	}
 
 	// reqtype = 'POST';
-	let postdata = 'operation=create&elementType=' + module + '&element=' + JSON.stringify(valuemap);
+	let postdata = addcbWsOptions('create', valuemap, module, 'element');
 	fetchOptions.body = postdata;
 	fetchOptions.method = 'post';
 	return fetch(_serviceurl, fetchOptions)
@@ -582,7 +602,7 @@ export function doUpdate(module, valuemap) {
 	}
 
 	// reqtype = 'POST';
-	let postdata = 'operation=update&elementType=' + module + '&element=' + JSON.stringify(valuemap);
+	let postdata = addcbWsOptions('update', valuemap, module, 'element');
 	fetchOptions.body = postdata;
 	fetchOptions.method = 'post';
 	return fetch(_serviceurl, fetchOptions)
@@ -611,7 +631,7 @@ export function doUpdate(module, valuemap) {
  */
 export function doRevise(module, valuemap) {
 	// reqtype = 'POST';
-	let postdata = 'operation=revise&elementType=' + module + '&element=' + JSON.stringify(valuemap);
+	let postdata = addcbWsOptions('revise', valuemap, module, 'element');
 	fetchOptions.body = postdata;
 	fetchOptions.method = 'post';
 	return fetch(_serviceurl, fetchOptions)
@@ -705,8 +725,7 @@ export function doInvoke(method, params, type) {
 	if (typeof(type) != 'undefined') {
 		reqtype = type.toUpperCase();
 	}
-
-	let postdata = 'operation=' + method;
+	let postdata = addcbWsOptions(method);
 	for (let key in params) {
 		postdata += '&' + key + '=' + params[key];
 	}
