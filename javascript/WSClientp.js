@@ -1,5 +1,12 @@
 // Include crypto-js library if you need to use doLoginPortal
 
+
+//Session Expiry event
+window.coreBOS.SessionExpired = new CustomEvent('coreBOSSessionExpiredEvent', {});
+//Authorization Required event
+window.coreBOS.AuthorizationRequired = new CustomEvent('coreBOSAuthorizationRequiredEvent', {});
+
+
 var cbWSClient = function (url) {
 	this._servicebase = 'webservice.php';
 	if (url!='' && url.substr(url.length - 1) != '/') {
@@ -634,6 +641,23 @@ var cbWSClient = function (url) {
 };
 
 module.exports = cbWSClient;
+
+
+/**
+ * Authorization Validity detector/Checker
+ */
+function authorizationValidityDetector(error) {
+	//let errorCode = error.split(':')[1]?.trim() ?? '';
+	return (error.success===false && error.error.code === 'AUTHENTICATION_REQUIRED');
+}
+
+/**
+ * Session Validity detector/Checker
+ */
+function sessionValidityDetector(error) {
+	//let errorCode = error.split(':')[1]?.trim() ?? '';
+	return (error.success===false && error.error.code === 'INVALID_SESSIONID');
+}
 
 // MD5 (Message-Digest Algorithm) by WebToolkit
 // eslint-disable-next-line
