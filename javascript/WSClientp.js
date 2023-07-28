@@ -28,6 +28,7 @@ var cbWSClient = function (url) {
 	// Webservice login credentials
 	this._sessionid  = false;
 	this._userid     = false;
+	this._cbwsOptions = [];
 
 	// Webservice login user data
 	this._entityid = '';
@@ -60,6 +61,25 @@ var cbWSClient = function (url) {
 			'sessionName': this._sessionid,
 			'userId': this._userid
 		};
+	}
+
+	/**
+	 * valueMapParam = 'elements' || 'element'
+	 */
+	this.addcbWsOptions = function(operation, valueMap=null, resource='', valueMapParam = 'element') {
+		let reqData = `operation=${operation}`;
+		if(valueMap && (typeof valueMap  === 'object' || Array.isArray(valueMap))){
+			reqData += `&${valueMapParam}=${JSON.stringify(valueMap)}`;
+		}
+		if(resource){
+			reqData += `&elementType=${resource}`;
+		}
+		if (this._cbwsOptions && this._cbwsOptions.length > 0) {
+			reqData += `&cbwsOptions=${JSON.stringify(this._cbwsOptions)}`;
+			this._cbwsOptions = [];
+		}
+
+		return reqData;
 	}
 
 	/**
