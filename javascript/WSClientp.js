@@ -472,7 +472,7 @@ var cbWSClient = function (url) {
 			valuemap['assigned_user_id'] = this._userid;
 		}
 
-		let postdata = 'operation=create&sessionName=' + this._sessionid + '&elementType=' + module + '&element=' + JSON.stringify(valuemap);
+		let postdata = this.addcbWsOptions('create', valuemap, module, 'element');
 		this.fetchOptions.body = postdata;
 		this.fetchOptions.method = 'post';
 		let myself = this;
@@ -508,7 +508,7 @@ var cbWSClient = function (url) {
 			valuemap['assigned_user_id'] = this._userid;
 		}
 
-		let postdata = 'operation=update&sessionName=' + this._sessionid + '&elementType=' + module + '&element=' + JSON.stringify(valuemap);
+		let postdata = this.addcbWsOptions('update', valuemap, module, 'element');
 		this.fetchOptions.body = postdata;
 		this.fetchOptions.method = 'post';
 		let myself = this;
@@ -539,7 +539,7 @@ var cbWSClient = function (url) {
 	this.doRevise = function (module, valuemap) {
 		this.__checkLogin();
 
-		let postdata = 'operation=revise&sessionName=' + this._sessionid + '&elementType=' + module + '&element=' + JSON.stringify(valuemap);
+		let postdata = this.addcbWsOptions('revise', valuemap, module, 'element');
 		this.fetchOptions.body = postdata;
 		this.fetchOptions.method = 'post';
 		let myself = this;
@@ -610,7 +610,7 @@ var cbWSClient = function (url) {
 			reqtype = type.toUpperCase();
 		}
 
-		let postdata = 'operation=' + method + '&sessionName=' + this._sessionid;
+		let postdata = this.addcbWsOptions(method);
 		for (let key in params) {
 			postdata += '&' + key + '=' + params[key];
 		}
