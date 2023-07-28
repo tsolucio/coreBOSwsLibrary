@@ -262,7 +262,7 @@ var cbWSClient = function (url) {
 	this.doLogout = function () {
 		this.__checkLogin();
 
-		let postdata = 'operation=logout&sessionName=' + this._sessionid;
+		let postdata = 'operation=logout';
 		this.fetchOptions.body = postdata;
 		this.fetchOptions.method = 'post';
 		let myself = this;
@@ -320,7 +320,7 @@ var cbWSClient = function (url) {
 			query += ';';
 		}
 
-		let params = '?operation=query&sessionName=' + this._sessionid + '&query=' + query;
+		let params = '?operation=query&query=' + query;
 		this.fetchOptions.method = 'get';
 		delete this.fetchOptions.body;
 		let myself = this;
@@ -365,7 +365,7 @@ var cbWSClient = function (url) {
 	this.doListTypes = function () {
 		this.__checkLogin();
 
-		let params = '?operation=listtypes&sessionName=' + this._sessionid;
+		let params = '?operation=listtypes';
 		this.fetchOptions.method = 'get';
 		delete this.fetchOptions.body;
 		let myself = this;
@@ -405,7 +405,7 @@ var cbWSClient = function (url) {
 	this.doDescribe = function (module) {
 		this.__checkLogin();
 
-		let params = '?operation=describe&sessionName=' + this._sessionid + '&elementType=' + module;
+		let params = '?operation=describe&elementType=' + module;
 		this.fetchOptions.method = 'get';
 		delete this.fetchOptions.body;
 		let myself = this;
@@ -436,7 +436,7 @@ var cbWSClient = function (url) {
 	this.doRetrieve = function (record) {
 		this.__checkLogin();
 
-		let params = '?operation=retrieve&sessionName=' + this._sessionid + '&id=' + record;
+		let params = '?operation=retrieve&id=' + record;
 		this.fetchOptions.method = 'get';
 		delete this.fetchOptions.body;
 		let myself = this;
@@ -570,7 +570,7 @@ var cbWSClient = function (url) {
 	this.doDelete = function (id) {
 		this.__checkLogin();
 
-		let postdata = 'operation=delete&sessionName=' + this._sessionid + '&id=' + id;
+		let postdata = 'operation=delete&id=' + id;
 		this.fetchOptions.body = postdata;
 		this.fetchOptions.method = 'post';
 		let myself = this;
@@ -654,7 +654,7 @@ var cbWSClient = function (url) {
 		// reqtype = 'POST';
 		recordInformation.module = recordInformation.module || module;
 		recordInformation.record = recordInformation.record || record;
-		let postdata = 'operation=ValidateInformation&sessionName=' + this._sessionid;
+		let postdata = 'operation=ValidateInformation';
 		postdata += '&context=' + JSON.stringify(recordInformation);
 		this.fetchOptions.body = postdata;
 		this.fetchOptions.method = 'post';
@@ -680,7 +680,7 @@ var cbWSClient = function (url) {
 		// Perform re-login if required.
 		this.__checkLogin();
 
-		let postdata = 'operation=getRelatedRecords&sessionName=' + this._sessionid + '&id=' + record + '&module=' + module;
+		let postdata = 'operation=getRelatedRecords&id=' + record + '&module=' + module;
 		postdata += '&relatedModule=' + relatedModule + '&queryParameters=' + JSON.stringify(queryParameters);
 		this.fetchOptions.body = postdata;
 		this.fetchOptions.method = 'post';
@@ -715,7 +715,7 @@ var cbWSClient = function (url) {
 		// Perform re-login if required.
 		this.__checkLogin();
 
-		let postdata = 'operation=SetRelation&sessionName=' + this._sessionid + '&relate_this_id=' + relate_this_id + '&with_these_ids=' + JSON.stringify(with_these_ids);
+		let postdata = 'operation=SetRelation&relate_this_id=' + relate_this_id + '&with_these_ids=' + JSON.stringify(with_these_ids);
 		this.fetchOptions.body = postdata;
 		this.fetchOptions.method = 'get';
 		let myself = this;
