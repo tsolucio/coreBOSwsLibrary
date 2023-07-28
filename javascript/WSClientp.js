@@ -47,6 +47,21 @@ var cbWSClient = function (url) {
 		}
 	};
 
+	this.setSession = function(logindata) {
+		this._sessionid = logindata?.sessionName;
+		this._userid = logindata?.userId;
+		if(this.fetchOptions && this.fetchOptions.headers){
+			this.fetchOptions.headers.corebos_authorization = logindata?.sessionName;
+		}
+	}
+
+	this.getSession = function() {
+		return {
+			'sessionName': this._sessionid,
+			'userId': this._userid
+		};
+	}
+
 	/**
 	 * Get actual record id from the response id.
 	 */
@@ -296,6 +311,12 @@ var cbWSClient = function (url) {
 				if (!myself.hasError(data)) {
 					return Promise.resolve(data['result']);
 				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
 					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
 				}
 			})
@@ -344,6 +365,12 @@ var cbWSClient = function (url) {
 					}
 					return Promise.resolve(returnvalue);
 				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
 					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
 				}
 			})
@@ -369,6 +396,12 @@ var cbWSClient = function (url) {
 				if (!myself.hasError(data)) {
 					return Promise.resolve(data['result']);
 				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
 					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
 				}
 			})
@@ -394,6 +427,12 @@ var cbWSClient = function (url) {
 				if (!myself.hasError(data)) {
 					return Promise.resolve(data['result']);
 				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
 					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
 				}
 			})
@@ -424,6 +463,12 @@ var cbWSClient = function (url) {
 				if (!myself.hasError(data)) {
 					return Promise.resolve(data['result']);
 				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
 					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
 				}
 			})
@@ -454,6 +499,12 @@ var cbWSClient = function (url) {
 				if (!myself.hasError(data)) {
 					return Promise.resolve(data['result']);
 				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
 					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
 				}
 			})
@@ -479,6 +530,12 @@ var cbWSClient = function (url) {
 				if (!myself.hasError(data)) {
 					return Promise.resolve(data['result']);
 				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
 					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
 				}
 			})
@@ -504,6 +561,12 @@ var cbWSClient = function (url) {
 				if (!myself.hasError(data)) {
 					return Promise.resolve(data['result']);
 				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
 					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
 				}
 			})
@@ -547,6 +610,12 @@ var cbWSClient = function (url) {
 				if (!myself.hasError(data)) {
 					return Promise.resolve(data['result']);
 				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
 					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
 				}
 			})
@@ -565,7 +634,7 @@ var cbWSClient = function (url) {
 		// reqtype = 'POST';
 		recordInformation.module = recordInformation.module || module;
 		recordInformation.record = recordInformation.record || record;
-		let postdata = 'operation=ValidateInformation&sessionName=' + _sessionid;
+		let postdata = 'operation=ValidateInformation&sessionName=' + this._sessionid;
 		postdata += '&context=' + JSON.stringify(recordInformation);
 		this.fetchOptions.body = postdata;
 		this.fetchOptions.method = 'post';
@@ -603,6 +672,12 @@ var cbWSClient = function (url) {
 				if (!myself.hasError(data)) {
 					return Promise.resolve(data['result']);
 				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
 					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
 				}
 			})
@@ -631,6 +706,12 @@ var cbWSClient = function (url) {
 				if (!myself.hasError(data)) {
 					return Promise.resolve(data['result']);
 				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
 					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
 				}
 			})
