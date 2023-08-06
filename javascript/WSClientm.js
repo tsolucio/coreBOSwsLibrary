@@ -500,6 +500,69 @@ export function doRetrieve(record) {
 }
 
 /**
+ * Upsert Operation
+ */
+export function doUpsert(module, createFields, searchOn, updateFields) {
+	// reqtype = 'POST';
+	let postdata = 'operation=upsert&sessionName='+_sessionid+'&elementType='+module+'&element='+JSON.stringify(createFields);
+	postdata += '&searchOn=' + searchOn + '&updatedfields=' + updateFields;
+	if (_cbwsOptions && _cbwsOptions.length > 0) {
+		postdata += `&cbwsOptions=${JSON.stringify(_cbwsOptions)}`;
+		_cbwsOptions = [];
+	}
+	fetchOptions.body = postdata;
+	fetchOptions.method = 'post';
+	return fetch(_serviceurl, fetchOptions)
+		.then(status)
+		.then(getData)
+		.then(function (data) {
+			if (hasError(data) === false) {
+				return Promise.resolve(data['result']);
+			} else {
+				if (sessionValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}
+				if (authorizationValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+				}
+				return Promise.reject(new Error('incorrect response: '+lastError()));
+			}
+		})
+		.catch(function (error) {
+			return Promise.reject(error);
+		});
+}
+
+/**
+ * Mass Update Operation
+ */
+export function doMassUpdate(elements) {
+	// reqtype = 'POST';
+	let postdata = addcbWsOptions('MassUpdate', elements, '', 'elements');
+	fetchOptions.body = postdata;
+	fetchOptions.method = 'post';
+	return fetch(_serviceurl, fetchOptions)
+		.then(status)
+		.then(getData)
+		.then(function (data) {
+			if (hasError(data) === false) {
+				return Promise.resolve(data['result']);
+			} else {
+				if (sessionValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}
+				if (authorizationValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+				}
+				return Promise.reject(new Error('incorrect response: '+lastError()));
+			}
+		})
+		.catch(function (error) {
+			return Promise.reject(error);
+		});
+}
+
+/**
  * Mass Upsert Operation
  */
 export function doMassUpsert(elements) {

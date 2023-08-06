@@ -761,6 +761,69 @@ var cbWSClient = function (url) {
 	};
 
 	/**
+	 * Upsert Operation
+	 */
+	this.doUpsert = function (module, createFields, searchOn, updateFields) {
+		let postdata = 'operation=upsert&sessionName='+this._sessionid+'&elementType='+module+'&element='+JSON.stringify(createFields);
+		postdata += '&searchOn=' + searchOn + '&updatedfields=' + updateFields;
+		if (this._cbwsOptions && this._cbwsOptions.length > 0) {
+			postdata += `&cbwsOptions=${JSON.stringify(this._cbwsOptions)}`;
+			this._cbwsOptions = [];
+		}
+		this.fetchOptions.body = postdata;
+		this.fetchOptions.method = 'post';
+		let myself = this;
+		return fetch(this._serviceurl, this.fetchOptions)
+			.then(this.status)
+			.then(this.getData)
+			.then(function (data) {
+				if (!myself.hasError(data)) {
+					return Promise.resolve(data['result']);
+				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
+					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
+				}
+			})
+			.catch(function (error) {
+				return Promise.reject(error);
+			});
+	};
+
+	/**
+	 * Mass Update Operation
+	 */
+	this.doMassUpdate = function (elements) {
+		let postdata = this.addcbWsOptions('MassUpdate', elements, '', 'elements');
+		this.fetchOptions.body = postdata;
+		this.fetchOptions.method = 'post';
+		let myself = this;
+		return fetch(this._serviceurl, this.fetchOptions)
+			.then(this.status)
+			.then(this.getData)
+			.then(function (data) {
+				if (!myself.hasError(data)) {
+					return Promise.resolve(data['result']);
+				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
+					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
+				}
+			})
+			.catch(function (error) {
+				return Promise.reject(error);
+			});
+	};
+
+	/**
 	 * Mass Upsert Operation
 	 */
 	this.doMassUpsert = function (elements) {
