@@ -42,7 +42,7 @@ class WebserviceException(Exception):
         self.message = message
 
     def __str__(self):
-        return "VtigerWebserviceException(%s, %s)" % (self.code, self.message)
+        return "WebserviceException(%s, %s)" % (self.code, self.message)
 
 
 def exception(response):
@@ -52,7 +52,7 @@ def exception(response):
 
 class WSClient:
     """
-    Connect to a vtiger instance.
+    Connect to a coreBOS instance.
     """
 
     def __init__(self, service_url):
@@ -117,6 +117,10 @@ class WSClient:
         @param parameters:
         @return: @raise exception:
         """
+        return_all = False
+        if '_libReturnAll' in parameters:
+            del parameters['_libReturnAll']
+            return_all = True
         response = self.__do_get(
             operation=operation,
             sessionName=self.__sessionid,
@@ -124,7 +128,10 @@ class WSClient:
         )
 
         if response['success']:
-            return response['result']
+            if return_all:
+                return response
+            else:
+                return response['result']
         else:
             raise exception(response)
 
@@ -134,22 +141,26 @@ class WSClient:
         @param parameters:
         @return: @raise exception:
         """
+        return_all = False
+        if '_libReturnAll' in parameters:
+            del parameters['_libReturnAll']
+            return_all = True
         response = self.__do_post(
             operation=operation,
             sessionName=self.__sessionid,
             **parameters)
 
         if response['success']:
-            return response['result']
+            if return_all:
+                return response
+            else:
+                return response['result']
         else:
             raise exception(response)
 
     # Check and perform login if requried.
     def __check_login(self):
-        if self.__sessionid != 0:
-            return True
-        else:
-            return False
+        return self.__sessionid != 0
 
     # Perform the challenge
     def __do_challenge(self, user_name):
@@ -267,6 +278,41 @@ class WSClient:
             element=json_data
         )
 
+    # Do Revise Operation
+    def do_revise(self, params):
+        """
+        @param params:
+        @return:
+        """
+        if not self.__check_login():
+            raise Exception('Login error')
+
+        json_data = json.dumps(params)
+        return self.post(
+            'revise',
+            element=json_data
+        )
+
+    # Do Upsert Operation
+    def do_upsert(self, modulename, createfields, searchon, updatefields):
+        """
+        @param modulename:
+        @param createFields:
+        @param searchOn:
+        @param updateFields:
+        @return:
+        """
+        if not self.__check_login():
+            raise Exception('Login error')
+
+        return self.post(
+            'upsert',
+            elementType = modulename,
+            element = json.dumps(createfields),
+            searchOn = searchon,
+            updatedfields = updatefields
+        )
+
     #Do Delete Operation
     def do_delete(self, id):
         """
@@ -279,6 +325,81 @@ class WSClient:
         return self.post(
             'delete',
             id=id
+        )
+
+    #Do Mass Delete Operation
+    def do_massdelete(self, ids):
+        """
+        @param ids:
+        @return:
+        """
+        if not self.__check_login():
+            raise Exception('Login error')
+
+        return self.post(
+            'MassDelete',
+            ids=ids
+        )
+
+    #Do Mass Retrieve Operation
+    def do_massretrieve(self, ids):
+        """
+        @param ids:
+        @return:
+        """
+        if not self.__check_login():
+            raise Exception('Login error')
+
+        return self.post(
+            'MassRetrieve',
+            ids=ids
+        )
+
+    #Do Mass Update Operation
+    def do_massupdate(self, elements):
+        """
+        @param elements:
+        @return:
+        """
+        if not self.__check_login():
+            raise Exception('Login error')
+
+        return self.post(
+            'MassUpdate',
+            elements=json.dumps(elements)
+        )
+
+    #Do Mass Upsert Operation
+    def do_massupsert(self, elements):
+        """
+        @param elements:
+        @return:
+        """
+        if not self.__check_login():
+            raise Exception('Login error')
+
+        return self.post(
+            'MassCreate',
+            elements=json.dumps(elements)
+        )
+
+    #Do Validate Information Operation
+    def do_validateinformation(self, record, module, recordinformation):
+        """
+        @param record:
+        @param module:
+        @param recordinformation:
+        @return:
+        """
+        if not self.__check_login():
+            raise Exception('Login error')
+        if 'module' not in recordinformation:
+            recordinformation['module'] = module
+        if 'module' not in recordinformation:
+            recordinformation['record'] = record
+        return self.post(
+            'ValidateInformation',
+            context=json.dumps(recordinformation)
         )
 
     #Do Query Operation
@@ -294,6 +415,25 @@ class WSClient:
             'query',
             query=query
         )
+
+    #Do Query Operation
+    def do_querywithtotal(self, query):
+        """
+        @param query:
+        @return:
+        """
+        if not self.__check_login():
+            raise Exception('Login error')
+
+        ret = self.get(
+            'query',
+            query=query,
+            _libReturnAll=True
+        )
+        return {
+            'result': ret['result'],
+            'totalrows': ret['moreinfo']['totalrows']
+        }
 
     #Invoke custom operation
     def do_invoke(self, metod, params, metod_type='POST'):
@@ -337,8 +477,8 @@ class WSClient:
     def do_set_related(self, relate_this_id, with_this_ids):
         """
         * Set relation between records.
-	    * param relate_this_id string ID of record we want to related other records with
-	    * param with_this_ids string/array either a string with one unique ID or an array of IDs to relate to the first parameter
+        * param relate_this_id string ID of record we want to related other records with
+        * param with_this_ids string/array either a string with one unique ID or an array of IDs to relate to the first parameter
 
         :param relate_this_id:
         :param with_this_ids:
