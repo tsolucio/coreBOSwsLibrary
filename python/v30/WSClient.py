@@ -71,6 +71,9 @@ class WSClient:
 
         self.__sessionid = False
         self.__userid = False
+        self.__entityid = ''
+        self.__language = ''
+
 
     def __do_get(self, **params):
         """
@@ -202,6 +205,43 @@ class WSClient:
             self.__userid = response['result']['userId']
             self.__serviceuser = user_name
             self.__servicekey = user_accesskey
+            return True
+        else:
+            raise exception(response)
+
+    # Do Login Portal Operation
+    def do_loginportal(self, user_name, password, passwordhash='md5', entity='Contacts'):
+        """
+        @param user_name:
+        @param password:
+        @param passwordhash:
+        @param entity:
+        @return:
+        """
+        if not self.__do_challenge(user_name):
+            return False
+        if passwordhash=='sha256':
+            accesscrypt = hashlib.sha256(self.__servicetoken + password).hexdigest()
+        elif passwordhash=='sha512':
+            accesscrypt = hashlib.sha512(self.__servicetoken + password).hexdigest()
+        elif passwordhash=='plaintext':
+            accesscrypt = self.__servicetoken + password
+        else: #  passwordhash=='md5'
+            accesscrypt = md5sum(self.__servicetoken + password)
+        response = self.__do_get(
+            operation='loginPortal',
+            username=user_name,
+            password=accesscrypt,
+            entity=entity,
+        )
+
+        if response['success']:
+            self.__sessionid = response['result']['sessionName']
+            self.__userid = response['result']['user']['id']
+            self.__serviceuser = response['result']['user']['user_name']
+            self.__servicekey = response['result']['user']['accesskey']
+            self.__entityid = response['result']['user']['contactid']
+            self.__language = response['result']['user']['language']
             return True
         else:
             raise exception(response)
