@@ -262,6 +262,32 @@ class Vtiger_WSClient {
 	}
 
 	/**
+	 * Do Query Operation with Total.
+	 */
+	public function doQueryWithTotal($query) {
+		// Make sure the query ends with ;
+		$query = trim($query);
+		if (strrpos($query, ';') != strlen($query)-1) {
+			$query .= ';';
+		}
+
+		$getdata = array(
+			'operation' => 'query',
+			'sessionName' => $this->_sessionid,
+			'query' => $query
+		);
+		$resultdata = $this->_client->doGet($getdata, true);
+
+		if ($this->hasError($resultdata)) {
+			return false;
+		}
+		return [
+			'result' => $resultdata['result'],
+			'totalrows' => $resultdata['moreinfo']['totalrows']
+		];
+	}
+
+	/**
 	 * Get Result Column Names.
 	 */
 	public function getResultColumns($result) {
@@ -310,6 +336,25 @@ class Vtiger_WSClient {
 			'elementType' => $module
 		);
 		$resultdata = $this->_client->doGet($getdata, true);
+		if ($this->hasError($resultdata)) {
+			return false;
+		}
+		return $resultdata['result'];
+	}
+
+	public function doValidateInformation($record, $module, $recordInformation) {
+		$recordInformation['module'] = empty($recordInformation['module']) ? $module : $recordInformation['module'];
+		$recordInformation['record'] = empty($recordInformation['record']) ? $record : $recordInformation['record'];
+		$postdata = array(
+			'operation' => 'ValidateInformation',
+			'sessionName' => $this->_sessionid,
+			'context' => json_encode($recordInformation)
+		);
+		if (!empty($this->cbwsOptions)) {
+			$postdata['cbwsOptions'] = $this->cbwsOptions;
+			$this->cbwsOptions = [];
+		}
+		$resultdata = $this->_client->doPost($postdata, true);
 		if ($this->hasError($resultdata)) {
 			return false;
 		}
@@ -527,7 +572,7 @@ class Vtiger_WSClient {
 	 * @param object $type null or parameter values to method
 	 * @param string $params optional (POST/GET)
 	 */
-	public function doInvoke($method, $params = null, $type = 'POST') {
+	public function doInvoke($method, $params = [], $type = 'POST') {
 		$senddata = array(
 			'operation' => $method,
 			'sessionName' => $this->_sessionid
