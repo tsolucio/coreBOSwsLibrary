@@ -139,13 +139,6 @@ var cbWSClient = function (url) {
 	};
 
 	/**
-	 * Check and perform login if requried.
-	 */
-	this.__checkLogin = function () {
-		return true;
-	};
-
-	/**
 	 * Login Operation
 	 */
 	this.doLogin = function (username, accesskey, withpassword) {
@@ -260,8 +253,6 @@ var cbWSClient = function (url) {
 	 * Logout Operation
 	 */
 	this.doLogout = function () {
-		this.__checkLogin();
-
 		let postdata = 'operation=logout&sessionName=' + this._sessionid;
 		this.fetchOptions.body = postdata;
 		this.fetchOptions.method = 'post';
@@ -314,8 +305,6 @@ var cbWSClient = function (url) {
 	 * Query Operation.
 	 */
 	this.doQuery = function (query) {
-		this.__checkLogin();
-
 		if (query.indexOf(';') == -1) {
 			query += ';';
 		}
@@ -363,8 +352,6 @@ var cbWSClient = function (url) {
 	 * List types (modules) available.
 	 */
 	this.doListTypes = function () {
-		this.__checkLogin();
-
 		let params = '?operation=listtypes&sessionName=' + this._sessionid;
 		this.fetchOptions.method = 'get';
 		delete this.fetchOptions.body;
@@ -403,8 +390,6 @@ var cbWSClient = function (url) {
 	 * Describe Operation
 	 */
 	this.doDescribe = function (module) {
-		this.__checkLogin();
-
 		let params = '?operation=describe&sessionName=' + this._sessionid + '&elementType=' + module;
 		this.fetchOptions.method = 'get';
 		delete this.fetchOptions.body;
@@ -434,8 +419,6 @@ var cbWSClient = function (url) {
 	 * Retrieve details of record
 	 */
 	this.doRetrieve = function (record) {
-		this.__checkLogin();
-
 		let params = '?operation=retrieve&sessionName=' + this._sessionid + '&id=' + record;
 		this.fetchOptions.method = 'get';
 		delete this.fetchOptions.body;
@@ -465,8 +448,6 @@ var cbWSClient = function (url) {
 	 * Create Operation
 	 */
 	this.doCreate = function (module, valuemap) {
-		this.__checkLogin();
-
 		// Assign record to logged in user if not specified
 		if (valuemap['assigned_user_id'] == null) {
 			valuemap['assigned_user_id'] = this._userid;
@@ -501,8 +482,6 @@ var cbWSClient = function (url) {
 	 * Update Operation
 	 */
 	this.doUpdate = function (module, valuemap) {
-		this.__checkLogin();
-
 		// Assign record to logged in user if not specified
 		if (valuemap['assigned_user_id'] == null) {
 			valuemap['assigned_user_id'] = this._userid;
@@ -537,8 +516,6 @@ var cbWSClient = function (url) {
 	 * Revise Operation
 	 */
 	this.doRevise = function (module, valuemap) {
-		this.__checkLogin();
-
 		let postdata = this.addcbWsOptions('revise', valuemap, module, 'element');
 		this.fetchOptions.body = postdata;
 		this.fetchOptions.method = 'post';
@@ -568,8 +545,6 @@ var cbWSClient = function (url) {
 	 * Delete Operation
 	 */
 	this.doDelete = function (id) {
-		this.__checkLogin();
-
 		let postdata = 'operation=delete&sessionName=' + this._sessionid + '&id=' + id;
 		this.fetchOptions.body = postdata;
 		this.fetchOptions.method = 'post';
@@ -599,8 +574,6 @@ var cbWSClient = function (url) {
 	 * Invoke custom operation
 	 */
 	this.doInvoke = function (method, params, type) {
-		this.__checkLogin();
-
 		if (typeof(params) == 'undefined') {
 			params = {};
 		}
@@ -648,9 +621,6 @@ var cbWSClient = function (url) {
 	 * Validate Information
 	 */
 	this.doValidateInformation = function (record, module, recordInformation) {
-		// Perform re-login if required.
-		this.__checkLogin();
-
 		// reqtype = 'POST';
 		recordInformation.module = recordInformation.module || module;
 		recordInformation.record = recordInformation.record || record;
@@ -677,9 +647,6 @@ var cbWSClient = function (url) {
 	 * Retrieve related records.
 	 */
 	this.doGetRelatedRecords = function (record, module, relatedModule, queryParameters) {
-		// Perform re-login if required.
-		this.__checkLogin();
-
 		let postdata = 'operation=getRelatedRecords&sessionName=' + this._sessionid + '&id=' + record + '&module=' + module;
 		postdata += '&relatedModule=' + relatedModule + '&queryParameters=' + JSON.stringify(queryParameters);
 		this.fetchOptions.body = postdata;
@@ -712,9 +679,6 @@ var cbWSClient = function (url) {
 	 * param with_this_ids string/array either a string with one unique ID or an array of IDs to relate to the first parameter
 	 */
 	this.doSetRelated = function (relate_this_id, with_these_ids) {
-		// Perform re-login if required.
-		this.__checkLogin();
-
 		let postdata = 'operation=SetRelation&sessionName=' + this._sessionid + '&relate_this_id=' + relate_this_id + '&with_these_ids=' + JSON.stringify(with_these_ids);
 		this.fetchOptions.body = postdata;
 		this.fetchOptions.method = 'get';
