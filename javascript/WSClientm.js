@@ -503,7 +503,7 @@ export function doRetrieve(record) {
 /**
  * Mass Upsert Operation
  */
- export function doMassUpsert(elements) {
+export function doMassUpsert(elements) {
 	// reqtype = 'POST';
 	let postdata = addcbWsOptions('MassCreate', elements, '', 'elements');
 	fetchOptions.body = postdata;
@@ -848,7 +848,7 @@ export function doSetRelated(relate_this_id, with_these_ids) {
 /**
  * Authorization Validity detector/Checker
  */
- export function authorizationValidityDetector(error) {
+export function authorizationValidityDetector(error) {
 	//let errorCode = error.split(':')[1]?.trim() ?? '';
 	return (error.success===false && error.error.code === 'AUTHENTICATION_REQUIRED');
 }
