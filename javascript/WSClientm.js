@@ -48,8 +48,7 @@ export function setURL(cburl, fetchingOptions=null) {
 		// Format the url before appending servicebase
 		_serviceurl = cburl + (cburl.substr(cburl.length - 1) === '/' ? '' : '/') + _servicebase;
 	}
-	if(fetchingOptions){
-		console.log('fetchingOptions', fetchingOptions);
+	if (fetchingOptions) {
 		_setFetchOptions(fetchingOptions);
 	}
 }
