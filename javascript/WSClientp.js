@@ -51,7 +51,7 @@ var cbWSClient = function (url) {
 	this.setSession = function(logindata) {
 		this._sessionid = logindata?.sessionName;
 		this._userid = logindata?.userId;
-		if(this.fetchOptions && this.fetchOptions.headers){
+		if (this.fetchOptions && this.fetchOptions.headers) {
 			this.fetchOptions.headers.corebos_authorization = logindata?.sessionName;
 		}
 	}
@@ -60,6 +60,29 @@ var cbWSClient = function (url) {
 		return {
 			'sessionName': this._sessionid,
 			'userId': this._userid
+		};
+	}
+
+	this.setURL = function (cburl, fetchingOptions=null) {
+		if (cburl!=='') {
+			// Format the url before appending servicebase
+			this._serviceurl = cburl + (cburl.substr(cburl.length - 1) === '/' ? '' : '/') + this._servicebase;
+		}
+		if (fetchingOptions) {
+			this.fetchOptions.mode = fetchingOptions.mode;
+			this.fetchOptions.headers = fetchingOptions.headers;
+		}
+	}
+
+	this.getEntityId = function() {
+		return {
+			'entityid': _entityid,
+		};
+	}
+
+	this.getLanguage = function() {
+		return {
+			'language': _language,
 		};
 	}
 
@@ -319,6 +342,39 @@ var cbWSClient = function (url) {
 			.then(function (data) {
 				if (!myself.hasError(data)) {
 					return Promise.resolve(data['result']);
+				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
+					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
+				}
+			})
+			.catch(function (error) {
+				return Promise.reject(error);
+			});
+	};
+
+	/**
+	 * Query Operation with Totals.
+	 */
+	this.doQueryWithTotal = function (query) {
+		if (query.indexOf(';') == -1) {
+			query += ';';
+		}
+
+		let params = '?operation=query&sessionName=' + this._sessionid + '&query=' + query;
+		this.fetchOptions.method = 'get';
+		delete this.fetchOptions.body;
+		let myself = this;
+		return fetch(this._serviceurl + params, this.fetchOptions)
+			.then(this.status)
+			.then(this.getData)
+			.then(function (data) {
+				if (!myself.hasError(data)) {
+					return Promise.resolve({'result': data['result'], 'totalrows': data['moreinfo']['totalrows']});
 				} else {
 					if (sessionValidityDetector(data)) {
 						window.dispatchEvent(window.coreBOS.SessionExpired);
@@ -682,6 +738,93 @@ var cbWSClient = function (url) {
 		let postdata = 'operation=SetRelation&sessionName=' + this._sessionid + '&relate_this_id=' + relate_this_id + '&with_these_ids=' + JSON.stringify(with_these_ids);
 		this.fetchOptions.body = postdata;
 		this.fetchOptions.method = 'get';
+		let myself = this;
+		return fetch(this._serviceurl, this.fetchOptions)
+			.then(this.status)
+			.then(this.getData)
+			.then(function (data) {
+				if (!myself.hasError(data)) {
+					return Promise.resolve(data['result']);
+				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
+					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
+				}
+			})
+			.catch(function (error) {
+				return Promise.reject(error);
+			});
+	};
+
+	/**
+	 * Mass Upsert Operation
+	 */
+	this.doMassUpsert = function (elements) {
+		let postdata = this.addcbWsOptions('MassCreate', elements, '', 'elements');
+		this.fetchOptions.body = postdata;
+		this.fetchOptions.method = 'post';
+		let myself = this;
+		return fetch(this._serviceurl, this.fetchOptions)
+			.then(this.status)
+			.then(this.getData)
+			.then(function (data) {
+				if (!myself.hasError(data)) {
+					return Promise.resolve(data['result']);
+				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
+					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
+				}
+			})
+			.catch(function (error) {
+				return Promise.reject(error);
+			});
+	};
+
+	/**
+	 * Mass Retrieve Operation
+	 */
+	this.doMassRetrieve = function (ids) {
+		let postdata = 'operation=MassRetrieve&sessionName=' + this._sessionid + '&ids=' + ids;
+		this.fetchOptions.body = postdata;
+		this.fetchOptions.method = 'post';
+		let myself = this;
+		return fetch(this._serviceurl, this.fetchOptions)
+			.then(this.status)
+			.then(this.getData)
+			.then(function (data) {
+				if (!myself.hasError(data)) {
+					return Promise.resolve(data['result']);
+				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
+					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
+				}
+			})
+			.catch(function (error) {
+				return Promise.reject(error);
+			});
+	};
+
+	/**
+	 * Mass Delete Operation
+	 */
+	this.doMassDelete = function (ids) {
+		let postdata = 'operation=MassDelete&sessionName=' + this._sessionid + '&ids=' + ids;
+		this.fetchOptions.body = postdata;
+		this.fetchOptions.method = 'post';
 		let myself = this;
 		return fetch(this._serviceurl, this.fetchOptions)
 			.then(this.status)
