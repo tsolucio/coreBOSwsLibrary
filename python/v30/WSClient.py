@@ -73,13 +73,21 @@ class WSClient:
         self.__userid = False
         self.__entityid = ''
         self.__language = ''
+        self.cbwsoptions = {}
 
+
+    def set_options(self, options):
+        self.cbwsoptions.update(options)
 
     def __do_get(self, **params):
         """
         @param params:
         @return:
         """
+        if len(self.cbwsoptions):
+            for k, v in self.cbwsoptions.items():
+                params[k] = v
+            self.cbwsoptions = {}
         param_string = urllib.parse.urlencode(params)
         response = urllib.request.urlopen('%s?%s' % (self.__service_url, param_string))
         content = response.read()
@@ -90,6 +98,10 @@ class WSClient:
         @param params:
         @return:
         """
+        if len(self.cbwsoptions):
+            for k, v in self.cbwsoptions.items():
+                parameters[k] = v
+            self.cbwsoptions = {}
         data = urllib.parse.urlencode(parameters)
         response = urllib.request.urlopen(self.__service_url, data.encode('utf-8'))
         content = response.read()
