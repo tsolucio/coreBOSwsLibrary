@@ -1,6 +1,5 @@
 // Include crypto-js library if you need to use doLoginPortal
 
-
 //Session Expiry event
 window.coreBOS.SessionExpired = new CustomEvent('coreBOSSessionExpiredEvent', {});
 //Authorization Required event
@@ -218,7 +217,7 @@ var cbWSClient = function (url) {
 			this.__doChallenge(username)
 				.then(function (data) {
 					if (myself.hasError(data) == false) {
-						let result = data['result'];  
+						let result = data['result'];
 						myself._servicetoken = result.token;
 						myself._servertime = result.serverTime;
 						myself._expiretime = result.expireTime;
@@ -244,7 +243,7 @@ var cbWSClient = function (url) {
 
 						postdata += '&password=' + hashed;
 
- 						myself.fetchOptions.body = postdata;
+						myself.fetchOptions.body = postdata;
 
 						fetch(myself._serviceurl + postdata, myself.fetchOptions)
 							.then(myself.status)

@@ -252,7 +252,7 @@ export async function doLoginPortal(username, password, hashmethod, entity) {
 							var result = logindata['result'];
 							_sessionid = result.sessionName;
 							_serviceuser = result.user.user_name;
-							_servicekey = result.user.accesskey; 
+							_servicekey = result.user.accesskey;
 							_userid = result.userId;
 							_entityid = result.entityid;
 							_language = result.language;
