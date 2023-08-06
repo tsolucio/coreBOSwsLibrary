@@ -1,10 +1,12 @@
 // Include crypto-js library if you need to use doLoginPortal
 
 //Session Expiry event
+if (typeof window.coreBOS == 'undefined') {
+	window.coreBOS = {};
+}
 window.coreBOS.SessionExpired = new CustomEvent('coreBOSSessionExpiredEvent', {});
 //Authorization Required event
 window.coreBOS.AuthorizationRequired = new CustomEvent('coreBOSAuthorizationRequiredEvent', {});
-
 
 var cbWSClient = function (url) {
 	this._servicebase = 'webservice.php';
@@ -909,9 +911,6 @@ var cbWSClient = function (url) {
 			});
 	};
 };
-
-module.exports = cbWSClient;
-
 
 /**
  * Authorization Validity detector/Checker
