@@ -13,7 +13,7 @@ var _expiretime = false;
 var _servicetoken=false;
 
 // Webservice login credentials
-var _sessionid  = false;
+var _sessionid  = '';
 var _userid     = false;
 var _cbwsOptions = [];
 
