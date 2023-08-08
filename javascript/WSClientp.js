@@ -91,7 +91,7 @@ var cbWSClient = function (url) {
 	 * valueMapParam = 'elements' || 'element'
 	 */
 	this.addcbWsOptions = function(operation, valueMap=null, resource='', valueMapParam = 'element') {
-		let reqData = `operation=${operation}`;
+		let reqData = `operation=${operation}&sessionName=${this._sessionid}`;
 		if(valueMap && (typeof valueMap  === 'object' || Array.isArray(valueMap))){
 			reqData += `&${valueMapParam}=${JSON.stringify(valueMap)}`;
 		}
