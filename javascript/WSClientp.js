@@ -27,7 +27,7 @@ var cbWSClient = function (url) {
 	this._servicetoken=false;
 
 	// Webservice login credentials
-	this._sessionid  = false;
+	this._sessionid  = '';
 	this._userid     = false;
 	this._cbwsOptions = [];
 
