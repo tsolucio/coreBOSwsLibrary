@@ -49,20 +49,20 @@ var cbWSClient = function (url) {
 		}
 	};
 
-	this.setSession = function(logindata) {
+	this.setSession = function (logindata) {
 		this._sessionid = logindata?.sessionName;
 		this._userid = logindata?.userId;
 		if (this.fetchOptions && this.fetchOptions.headers) {
 			this.fetchOptions.headers.corebos_authorization = logindata?.sessionName;
 		}
-	}
+	};
 
-	this.getSession = function() {
+	this.getSession = function () {
 		return {
 			'sessionName': this._sessionid,
 			'userId': this._userid
 		};
-	}
+	};
 
 	this.setURL = function (cburl, fetchingOptions=null) {
 		if (cburl!=='') {
@@ -73,29 +73,29 @@ var cbWSClient = function (url) {
 			this.fetchOptions.mode = fetchingOptions.mode;
 			this.fetchOptions.headers = fetchingOptions.headers;
 		}
-	}
+	};
 
-	this.getEntityId = function() {
+	this.getEntityId = function () {
 		return {
 			'entityid': _entityid,
 		};
-	}
+	};
 
-	this.getLanguage = function() {
+	this.getLanguage = function () {
 		return {
 			'language': _language,
 		};
-	}
+	};
 
 	/**
 	 * valueMapParam = 'elements' || 'element'
 	 */
-	this.addcbWsOptions = function(operation, valueMap=null, resource='', valueMapParam = 'element') {
-		let reqData = `operation=${operation}&sessionName=${this._sessionid}`;
-		if(valueMap && (typeof valueMap  === 'object' || Array.isArray(valueMap))){
+	this.addcbWsOptions = function (operation, valueMap=null, resource='', valueMapParam = 'element') {
+		let reqData = `operation=${operation}`;
+		if (valueMap && (typeof valueMap  === 'object' || Array.isArray(valueMap))) {
 			reqData += `&${valueMapParam}=${JSON.stringify(valueMap)}`;
 		}
-		if(resource){
+		if (resource) {
 			reqData += `&elementType=${resource}`;
 		}
 		if (this._cbwsOptions && this._cbwsOptions.length > 0) {
@@ -104,7 +104,7 @@ var cbWSClient = function (url) {
 		}
 
 		return reqData;
-	}
+	};
 
 	/**
 	 * Get actual record id from the response id.
@@ -228,19 +228,19 @@ var cbWSClient = function (url) {
 						let hashed = ''
 
 						switch (hashmethod) {
-							case 'sha256':
-								hashed = CryptoJS.SHA256(myself._servicetoken + password).toString();
-								break;
-							case 'sha512':
-								hashed = CryptoJS.SHA512(myself._servicetoken + password).toString();
-								break;
-							case 'plaintext':
-								hashed = myself._servicetoken + password;
-								break;
-							case 'md5':
-							default:
-								hashed = cbMD5(myself._servicetoken + password);
-								break;
+						case 'sha256':
+							hashed = CryptoJS.SHA256(myself._servicetoken + password).toString();
+							break;
+						case 'sha512':
+							hashed = CryptoJS.SHA512(myself._servicetoken + password).toString();
+							break;
+						case 'plaintext':
+							hashed = myself._servicetoken + password;
+							break;
+						case 'md5':
+						default:
+							hashed = cbMD5(myself._servicetoken + password);
+							break;
 						}
 
 						postdata += '&password=' + hashed;
