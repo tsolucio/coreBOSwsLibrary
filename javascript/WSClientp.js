@@ -225,7 +225,7 @@ var cbWSClient = function (url) {
 						myself._expiretime = result.expireTime;
 						myself.fetchOptions.method = 'get';
 						let postdata = '?operation=loginPortal&username=' + username + '&entity=' + entity || 'Contacts';
-						let hashed = ''
+						let hashed = '';
 
 						switch (hashmethod) {
 						case 'sha256':
