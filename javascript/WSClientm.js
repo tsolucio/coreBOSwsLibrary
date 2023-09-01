@@ -39,7 +39,7 @@ var fetchOptions = {
 	mode: 'cors',
 	headers: {
 		'Content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-		'corebos_authorization': _sessionid,
+		'corebos-authorization': _sessionid,
 	}
 };
 
