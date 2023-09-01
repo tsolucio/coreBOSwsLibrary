@@ -13,8 +13,9 @@ var _expiretime = false;
 var _servicetoken=false;
 
 // Webservice login credentials
-var _sessionid  = false;
+var _sessionid  = '';
 var _userid     = false;
+var _cbwsOptions = [];
 
 // Webservice login user data
 var _entityid = ''
@@ -38,7 +39,7 @@ var fetchOptions = {
 	mode: 'cors',
 	headers: {
 		'Content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-		'corebos_authorization': _sessionid,
+		'corebos-authorization': _sessionid,
 	}
 };
 
@@ -47,8 +48,7 @@ export function setURL(cburl, fetchingOptions=null) {
 		// Format the url before appending servicebase
 		_serviceurl = cburl + (cburl.substr(cburl.length - 1) === '/' ? '' : '/') + _servicebase;
 	}
-	if(fetchingOptions){
-		console.log('fetchingOptions', fetchingOptions);
+	if (fetchingOptions) {
 		_setFetchOptions(fetchingOptions);
 	}
 }
@@ -56,6 +56,25 @@ export function setURL(cburl, fetchingOptions=null) {
 function _setFetchOptions({mode, headers}) {
 	fetchOptions.mode = mode;
 	fetchOptions.headers = headers;
+}
+
+/**
+ * valueMapParam = 'elements' || 'element'
+ */
+function addcbWsOptions(operation, valueMap=null, resource='', valueMapParam = 'element') {
+	let reqData = `operation=${operation}`;
+	if(valueMap && (typeof valueMap  === 'object' || Array.isArray(valueMap))){
+		reqData += `&${valueMapParam}=${JSON.stringify(valueMap)}`;
+	}
+	if(resource){
+		reqData += `&elementType=${resource}`;
+	}
+	if (_cbwsOptions && _cbwsOptions.length > 0) {
+		reqData += `&cbwsOptions=${JSON.stringify(_cbwsOptions)}`;
+		_cbwsOptions = [];
+	}
+
+	return reqData;
 }
 
 export function setSession(logindata) {
@@ -233,7 +252,7 @@ export async function doLoginPortal(username, password, hashmethod, entity) {
 							var result = logindata['result'];
 							_sessionid = result.sessionName;
 							_serviceuser = result.user.user_name;
-							_servicekey = result.user.accesskey; 
+							_servicekey = result.user.accesskey;
 							_userid = result.userId;
 							_entityid = result.entityid;
 							_language = result.language;
@@ -481,11 +500,74 @@ export function doRetrieve(record) {
 }
 
 /**
+ * Upsert Operation
+ */
+export function doUpsert(module, createFields, searchOn, updateFields) {
+	// reqtype = 'POST';
+	let postdata = 'operation=upsert&sessionName='+_sessionid+'&elementType='+module+'&element='+JSON.stringify(createFields);
+	postdata += '&searchOn=' + searchOn + '&updatedfields=' + updateFields;
+	if (_cbwsOptions && _cbwsOptions.length > 0) {
+		postdata += `&cbwsOptions=${JSON.stringify(_cbwsOptions)}`;
+		_cbwsOptions = [];
+	}
+	fetchOptions.body = postdata;
+	fetchOptions.method = 'post';
+	return fetch(_serviceurl, fetchOptions)
+		.then(status)
+		.then(getData)
+		.then(function (data) {
+			if (hasError(data) === false) {
+				return Promise.resolve(data['result']);
+			} else {
+				if (sessionValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}
+				if (authorizationValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+				}
+				return Promise.reject(new Error('incorrect response: '+lastError()));
+			}
+		})
+		.catch(function (error) {
+			return Promise.reject(error);
+		});
+}
+
+/**
+ * Mass Update Operation
+ */
+export function doMassUpdate(elements) {
+	// reqtype = 'POST';
+	let postdata = addcbWsOptions('MassUpdate', elements, '', 'elements');
+	fetchOptions.body = postdata;
+	fetchOptions.method = 'post';
+	return fetch(_serviceurl, fetchOptions)
+		.then(status)
+		.then(getData)
+		.then(function (data) {
+			if (hasError(data) === false) {
+				return Promise.resolve(data['result']);
+			} else {
+				if (sessionValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.SessionExpired);
+				}
+				if (authorizationValidityDetector(data)) {
+					window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+				}
+				return Promise.reject(new Error('incorrect response: '+lastError()));
+			}
+		})
+		.catch(function (error) {
+			return Promise.reject(error);
+		});
+}
+
+/**
  * Mass Upsert Operation
  */
- export function doMassUpsert(elements) {
+export function doMassUpsert(elements) {
 	// reqtype = 'POST';
-	let postdata = 'operation=MassCreate&elements=' + JSON.stringify(elements);
+	let postdata = addcbWsOptions('MassCreate', elements, '', 'elements');
 	fetchOptions.body = postdata;
 	fetchOptions.method = 'post';
 	return fetch(_serviceurl, fetchOptions)
@@ -548,7 +630,7 @@ export function doCreate(module, valuemap) {
 	}
 
 	// reqtype = 'POST';
-	let postdata = 'operation=create&elementType=' + module + '&element=' + JSON.stringify(valuemap);
+	let postdata = addcbWsOptions('create', valuemap, module, 'element');
 	fetchOptions.body = postdata;
 	fetchOptions.method = 'post';
 	return fetch(_serviceurl, fetchOptions)
@@ -582,7 +664,7 @@ export function doUpdate(module, valuemap) {
 	}
 
 	// reqtype = 'POST';
-	let postdata = 'operation=update&elementType=' + module + '&element=' + JSON.stringify(valuemap);
+	let postdata = addcbWsOptions('update', valuemap, module, 'element');
 	fetchOptions.body = postdata;
 	fetchOptions.method = 'post';
 	return fetch(_serviceurl, fetchOptions)
@@ -611,7 +693,7 @@ export function doUpdate(module, valuemap) {
  */
 export function doRevise(module, valuemap) {
 	// reqtype = 'POST';
-	let postdata = 'operation=revise&elementType=' + module + '&element=' + JSON.stringify(valuemap);
+	let postdata = addcbWsOptions('revise', valuemap, module, 'element');
 	fetchOptions.body = postdata;
 	fetchOptions.method = 'post';
 	return fetch(_serviceurl, fetchOptions)
@@ -705,8 +787,7 @@ export function doInvoke(method, params, type) {
 	if (typeof(type) != 'undefined') {
 		reqtype = type.toUpperCase();
 	}
-
-	let postdata = 'operation=' + method;
+	let postdata = addcbWsOptions(method);
 	for (let key in params) {
 		postdata += '&' + key + '=' + params[key];
 	}
@@ -829,7 +910,7 @@ export function doSetRelated(relate_this_id, with_these_ids) {
 /**
  * Authorization Validity detector/Checker
  */
- export function authorizationValidityDetector(error) {
+export function authorizationValidityDetector(error) {
 	//let errorCode = error.split(':')[1]?.trim() ?? '';
 	return (error.success===false && error.error.code === 'AUTHENTICATION_REQUIRED');
 }

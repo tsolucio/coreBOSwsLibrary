@@ -1,5 +1,12 @@
-const fetch = require('node-fetch'); 
-import CryptoJS from 'crypto-js'
+// Include crypto-js library if you need to use doLoginPortal
+
+//Session Expiry event
+if (typeof window.coreBOS == 'undefined') {
+	window.coreBOS = {};
+}
+window.coreBOS.SessionExpired = new CustomEvent('coreBOSSessionExpiredEvent', {});
+//Authorization Required event
+window.coreBOS.AuthorizationRequired = new CustomEvent('coreBOSAuthorizationRequiredEvent', {});
 
 var cbWSClient = function (url) {
 	this._servicebase = 'webservice.php';
@@ -20,8 +27,9 @@ var cbWSClient = function (url) {
 	this._servicetoken=false;
 
 	// Webservice login credentials
-	this._sessionid  = false;
+	this._sessionid  = '';
 	this._userid     = false;
+	this._cbwsOptions = [];
 
 	// Webservice login user data
 	this._entityid = '';
@@ -36,8 +44,66 @@ var cbWSClient = function (url) {
 	this.fetchOptions = {
 		mode: 'cors',
 		headers: {
-			'Content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
+			'Content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+			'corebos-authorization': this._sessionid,
 		}
+	};
+
+	this.setSession = function (logindata) {
+		this._sessionid = logindata?.sessionName;
+		this._userid = logindata?.userId;
+		if (this.fetchOptions && this.fetchOptions.headers) {
+			this.fetchOptions.headers.corebos_authorization = logindata?.sessionName;
+		}
+	};
+
+	this.getSession = function () {
+		return {
+			'sessionName': this._sessionid,
+			'userId': this._userid
+		};
+	};
+
+	this.setURL = function (cburl, fetchingOptions=null) {
+		if (cburl!=='') {
+			// Format the url before appending servicebase
+			this._serviceurl = cburl + (cburl.substr(cburl.length - 1) === '/' ? '' : '/') + this._servicebase;
+		}
+		if (fetchingOptions) {
+			this.fetchOptions.mode = fetchingOptions.mode;
+			this.fetchOptions.headers = fetchingOptions.headers;
+		}
+	};
+
+	this.getEntityId = function () {
+		return {
+			'entityid': _entityid,
+		};
+	};
+
+	this.getLanguage = function () {
+		return {
+			'language': _language,
+		};
+	};
+
+	/**
+	 * valueMapParam = 'elements' || 'element'
+	 */
+	this.addcbWsOptions = function (operation, valueMap=null, resource='', valueMapParam = 'element') {
+		let reqData = `operation=${operation}`;
+		if (valueMap && (typeof valueMap  === 'object' || Array.isArray(valueMap))) {
+			reqData += `&${valueMapParam}=${JSON.stringify(valueMap)}`;
+		}
+		if (resource) {
+			reqData += `&elementType=${resource}`;
+		}
+		if (this._cbwsOptions && this._cbwsOptions.length > 0) {
+			reqData += `&cbwsOptions=${JSON.stringify(this._cbwsOptions)}`;
+			this._cbwsOptions = [];
+		}
+
+		return reqData;
 	};
 
 	/**
@@ -55,7 +121,7 @@ var cbWSClient = function (url) {
 	 * Check if result has any error.
 	 */
 	this.hasError = function (resultdata) {
-		if (resultdata != null && resultdata['success'] == false) {
+		if (resultdata != null && !resultdata['success']) {
 			this._lasterror = resultdata['error'].code + ': ' + resultdata['error'].message;
 			return true;
 		}
@@ -89,7 +155,6 @@ var cbWSClient = function (url) {
 	 * @access private
 	 */
 	this.__doChallenge = function (username) {
-		// reqtype = 'GET';
 		let params = '?operation=getchallenge&username=' + username;
 		this.fetchOptions.method = 'get';
 		return fetch(this._serviceurl + params, this.fetchOptions)
@@ -98,17 +163,9 @@ var cbWSClient = function (url) {
 	};
 
 	/**
-	 * Check and perform login if requried.
-	 */
-	this.__checkLogin = function () {
-		return true;
-	};
-
-	/**
 	 * Login Operation
 	 */
 	this.doLogin = function (username, accesskey, withpassword) {
-		// reqtype = 'POST';
 		this._serviceuser = username;
 		this._servicekey = accesskey;
 		if (withpassword == undefined) {
@@ -119,7 +176,7 @@ var cbWSClient = function (url) {
 		return new Promise((resolve, reject) => {
 			this.__doChallenge(username)
 				.then(function (data) {
-					if (myself.hasError(data) == false) {
+					if (!myself.hasError(data)) {
 						let result = data['result'];
 						myself._servicetoken = result.token;
 						myself._servertime = result.serverTime;
@@ -133,10 +190,10 @@ var cbWSClient = function (url) {
 							.then(myself.status)
 							.then(myself.getData)
 							.then(logindata => {
-								if (myself.hasError(logindata) == false) {
-									var result = logindata['result'];
-									myself._sessionid = result.sessionName;
-									myself._userid = result.userId;
+								if (!myself.hasError(logindata)) {
+									var rdo = logindata['result'];
+									myself._sessionid = rdo.sessionName;
+									myself._userid = rdo.userId;
 									resolve(logindata);
 								} else {
 									reject(new Error('incorrect response: ' + myself.lastError()));
@@ -162,39 +219,39 @@ var cbWSClient = function (url) {
 			this.__doChallenge(username)
 				.then(function (data) {
 					if (myself.hasError(data) == false) {
-						let result = data['result'];  
+						let result = data['result'];
 						myself._servicetoken = result.token;
 						myself._servertime = result.serverTime;
 						myself._expiretime = result.expireTime;
 						myself.fetchOptions.method = 'get';
 						let postdata = '?operation=loginPortal&username=' + username + '&entity=' + entity || 'Contacts';
-						let hashed = ''
+						let hashed = '';
 
 						switch (hashmethod) {
-							case 'sha256':
-								hashed = CryptoJS.SHA256(myself._servicetoken + password).toString();
-								break;
-							case 'sha512':
-								hashed = CryptoJS.SHA512(myself._servicetoken + password).toString();
-								break;
-							case 'plaintext':
-								hashed = myself._servicetoken + password;
-								break;
-							case 'md5':
-							default:
-								hashed = cbMD5(myself._servicetoken + password);
-								break;
+						case 'sha256':
+							hashed = CryptoJS.SHA256(myself._servicetoken + password).toString();
+							break;
+						case 'sha512':
+							hashed = CryptoJS.SHA512(myself._servicetoken + password).toString();
+							break;
+						case 'plaintext':
+							hashed = myself._servicetoken + password;
+							break;
+						case 'md5':
+						default:
+							hashed = cbMD5(myself._servicetoken + password);
+							break;
 						}
 
 						postdata += '&password=' + hashed;
 
- 						myself.fetchOptions.body = postdata;
+						myself.fetchOptions.body = postdata;
 
 						fetch(myself._serviceurl + postdata, myself.fetchOptions)
 							.then(myself.status)
 							.then(myself.getData)
 							.then(logindata => {
-								if (myself.hasError(logindata) == false) {
+								if (!myself.hasError(logindata)) {
 									var result = logindata['result'];
 									myself._sessionid = result.sessionName;
 									myself._serviceuser = result.user.user_name;
@@ -220,9 +277,6 @@ var cbWSClient = function (url) {
 	 * Logout Operation
 	 */
 	this.doLogout = function () {
-		this.__checkLogin();
-
-		// reqtype = 'POST';
 		let postdata = 'operation=logout&sessionName=' + this._sessionid;
 		this.fetchOptions.body = postdata;
 		this.fetchOptions.method = 'post';
@@ -231,7 +285,7 @@ var cbWSClient = function (url) {
 			.then(this.status)
 			.then(this.getData)
 			.then(function (data) {
-				if (myself.hasError(data) == false) {
+				if (!myself.hasError(data)) {
 					myself._servicetoken = false;
 					myself._servertime = false;
 					myself._expiretime = false;
@@ -248,7 +302,6 @@ var cbWSClient = function (url) {
 	};
 
 	this.extendSession = function () {
-		// reqtype = 'POST';
 		let postdata = 'operation=extendsession';
 		this.fetchOptions.body = postdata;
 		this.fetchOptions.credentials = 'include';
@@ -258,7 +311,7 @@ var cbWSClient = function (url) {
 			.then(this.status)
 			.then(this.getData)
 			.then(function (data) {
-				if (myself.hasError(data) == false) {
+				if (!myself.hasError(data)) {
 					myself._sessionid  = data['result'].sessionName;
 					myself._userid = data['result'].userId;
 					delete myself.fetchOptions.credentials;
@@ -276,13 +329,10 @@ var cbWSClient = function (url) {
 	 * Query Operation.
 	 */
 	this.doQuery = function (query) {
-		this.__checkLogin();
-
 		if (query.indexOf(';') == -1) {
 			query += ';';
 		}
 
-		// reqtype = 'GET';
 		let params = '?operation=query&sessionName=' + this._sessionid + '&query=' + query;
 		this.fetchOptions.method = 'get';
 		delete this.fetchOptions.body;
@@ -291,9 +341,48 @@ var cbWSClient = function (url) {
 			.then(this.status)
 			.then(this.getData)
 			.then(function (data) {
-				if (myself.hasError(data) == false) {
+				if (!myself.hasError(data)) {
 					return Promise.resolve(data['result']);
 				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
+					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
+				}
+			})
+			.catch(function (error) {
+				return Promise.reject(error);
+			});
+	};
+
+	/**
+	 * Query Operation with Totals.
+	 */
+	this.doQueryWithTotal = function (query) {
+		if (query.indexOf(';') == -1) {
+			query += ';';
+		}
+
+		let params = '?operation=query&sessionName=' + this._sessionid + '&query=' + query;
+		this.fetchOptions.method = 'get';
+		delete this.fetchOptions.body;
+		let myself = this;
+		return fetch(this._serviceurl + params, this.fetchOptions)
+			.then(this.status)
+			.then(this.getData)
+			.then(function (data) {
+				if (!myself.hasError(data)) {
+					return Promise.resolve({'result': data['result'], 'totalrows': data['moreinfo']['totalrows']});
+				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
 					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
 				}
 			})
@@ -320,9 +409,6 @@ var cbWSClient = function (url) {
 	 * List types (modules) available.
 	 */
 	this.doListTypes = function () {
-		this.__checkLogin();
-
-		// reqtype = 'GET';
 		let params = '?operation=listtypes&sessionName=' + this._sessionid;
 		this.fetchOptions.method = 'get';
 		delete this.fetchOptions.body;
@@ -331,7 +417,7 @@ var cbWSClient = function (url) {
 			.then(this.status)
 			.then(this.getData)
 			.then(function (data) {
-				if (myself.hasError(data) == false) {
+				if (!myself.hasError(data)) {
 					let result = data['result'];
 					let modulenames = result['types'];
 					let returnvalue = { };
@@ -343,6 +429,12 @@ var cbWSClient = function (url) {
 					}
 					return Promise.resolve(returnvalue);
 				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
 					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
 				}
 			})
@@ -355,9 +447,6 @@ var cbWSClient = function (url) {
 	 * Describe Operation
 	 */
 	this.doDescribe = function (module) {
-		this.__checkLogin();
-
-		// reqtype = 'GET';
 		let params = '?operation=describe&sessionName=' + this._sessionid + '&elementType=' + module;
 		this.fetchOptions.method = 'get';
 		delete this.fetchOptions.body;
@@ -366,9 +455,15 @@ var cbWSClient = function (url) {
 			.then(this.status)
 			.then(this.getData)
 			.then(function (data) {
-				if (myself.hasError(data) == false) {
+				if (!myself.hasError(data)) {
 					return Promise.resolve(data['result']);
 				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
 					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
 				}
 			})
@@ -381,9 +476,6 @@ var cbWSClient = function (url) {
 	 * Retrieve details of record
 	 */
 	this.doRetrieve = function (record) {
-		this.__checkLogin();
-
-		// reqtype = 'GET';
 		let params = '?operation=retrieve&sessionName=' + this._sessionid + '&id=' + record;
 		this.fetchOptions.method = 'get';
 		delete this.fetchOptions.body;
@@ -392,9 +484,15 @@ var cbWSClient = function (url) {
 			.then(this.status)
 			.then(this.getData)
 			.then(function (data) {
-				if (myself.hasError(data) == false) {
+				if (!myself.hasError(data)) {
 					return Promise.resolve(data['result']);
 				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
 					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
 				}
 			})
@@ -407,15 +505,12 @@ var cbWSClient = function (url) {
 	 * Create Operation
 	 */
 	this.doCreate = function (module, valuemap) {
-		this.__checkLogin();
-
 		// Assign record to logged in user if not specified
 		if (valuemap['assigned_user_id'] == null) {
 			valuemap['assigned_user_id'] = this._userid;
 		}
 
-		// reqtype = 'POST';
-		let postdata = 'operation=create&sessionName=' + this._sessionid + '&elementType=' + module + '&element=' + JSON.stringify(valuemap);
+		let postdata = this.addcbWsOptions('create', valuemap, module, 'element');
 		this.fetchOptions.body = postdata;
 		this.fetchOptions.method = 'post';
 		let myself = this;
@@ -423,9 +518,15 @@ var cbWSClient = function (url) {
 			.then(this.status)
 			.then(this.getData)
 			.then(function (data) {
-				if (myself.hasError(data) == false) {
+				if (!myself.hasError(data)) {
 					return Promise.resolve(data['result']);
 				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
 					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
 				}
 			})
@@ -438,15 +539,12 @@ var cbWSClient = function (url) {
 	 * Update Operation
 	 */
 	this.doUpdate = function (module, valuemap) {
-		this.__checkLogin();
-
 		// Assign record to logged in user if not specified
 		if (valuemap['assigned_user_id'] == null) {
 			valuemap['assigned_user_id'] = this._userid;
 		}
 
-		// reqtype = 'POST';
-		let postdata = 'operation=update&sessionName=' + this._sessionid + '&elementType=' + module + '&element=' + JSON.stringify(valuemap);
+		let postdata = this.addcbWsOptions('update', valuemap, module, 'element');
 		this.fetchOptions.body = postdata;
 		this.fetchOptions.method = 'post';
 		let myself = this;
@@ -454,9 +552,15 @@ var cbWSClient = function (url) {
 			.then(this.status)
 			.then(this.getData)
 			.then(function (data) {
-				if (myself.hasError(data) == false) {
+				if (!myself.hasError(data)) {
 					return Promise.resolve(data['result']);
 				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
 					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
 				}
 			})
@@ -469,10 +573,7 @@ var cbWSClient = function (url) {
 	 * Revise Operation
 	 */
 	this.doRevise = function (module, valuemap) {
-		this.__checkLogin();
-
-		// reqtype = 'POST';
-		let postdata = 'operation=revise&sessionName=' + this._sessionid + '&elementType=' + module + '&element=' + JSON.stringify(valuemap);
+		let postdata = this.addcbWsOptions('revise', valuemap, module, 'element');
 		this.fetchOptions.body = postdata;
 		this.fetchOptions.method = 'post';
 		let myself = this;
@@ -480,9 +581,15 @@ var cbWSClient = function (url) {
 			.then(this.status)
 			.then(this.getData)
 			.then(function (data) {
-				if (myself.hasError(data) == false) {
+				if (!myself.hasError(data)) {
 					return Promise.resolve(data['result']);
 				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
 					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
 				}
 			})
@@ -495,9 +602,6 @@ var cbWSClient = function (url) {
 	 * Delete Operation
 	 */
 	this.doDelete = function (id) {
-		this.__checkLogin();
-
-		// reqtype = 'POST';
 		let postdata = 'operation=delete&sessionName=' + this._sessionid + '&id=' + id;
 		this.fetchOptions.body = postdata;
 		this.fetchOptions.method = 'post';
@@ -506,9 +610,15 @@ var cbWSClient = function (url) {
 			.then(this.status)
 			.then(this.getData)
 			.then(function (data) {
-				if (myself.hasError(data) == false) {
+				if (!myself.hasError(data)) {
 					return Promise.resolve(data['result']);
 				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
 					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
 				}
 			})
@@ -521,8 +631,6 @@ var cbWSClient = function (url) {
 	 * Invoke custom operation
 	 */
 	this.doInvoke = function (method, params, type) {
-		this.__checkLogin();
-
 		if (typeof(params) == 'undefined') {
 			params = {};
 		}
@@ -532,7 +640,7 @@ var cbWSClient = function (url) {
 			reqtype = type.toUpperCase();
 		}
 
-		let postdata = 'operation=' + method + '&sessionName=' + this._sessionid;
+		let postdata = this.addcbWsOptions(method);
 		for (let key in params) {
 			postdata += '&' + key + '=' + params[key];
 		}
@@ -549,9 +657,15 @@ var cbWSClient = function (url) {
 			.then(this.status)
 			.then(this.getData)
 			.then(function (data) {
-				if (myself.hasError(data) == false) {
+				if (!myself.hasError(data)) {
 					return Promise.resolve(data['result']);
 				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
 					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
 				}
 			})
@@ -564,13 +678,10 @@ var cbWSClient = function (url) {
 	 * Validate Information
 	 */
 	this.doValidateInformation = function (record, module, recordInformation) {
-		// Perform re-login if required.
-		this.__checkLogin();
-
 		// reqtype = 'POST';
 		recordInformation.module = recordInformation.module || module;
 		recordInformation.record = recordInformation.record || record;
-		let postdata = 'operation=ValidateInformation&sessionName=' + _sessionid;
+		let postdata = 'operation=ValidateInformation&sessionName=' + this._sessionid;
 		postdata += '&context=' + JSON.stringify(recordInformation);
 		this.fetchOptions.body = postdata;
 		this.fetchOptions.method = 'post';
@@ -593,10 +704,6 @@ var cbWSClient = function (url) {
 	 * Retrieve related records.
 	 */
 	this.doGetRelatedRecords = function (record, module, relatedModule, queryParameters) {
-		// Perform re-login if required.
-		this.__checkLogin();
-
-		// reqtype = 'POST';
 		let postdata = 'operation=getRelatedRecords&sessionName=' + this._sessionid + '&id=' + record + '&module=' + module;
 		postdata += '&relatedModule=' + relatedModule + '&queryParameters=' + JSON.stringify(queryParameters);
 		this.fetchOptions.body = postdata;
@@ -606,9 +713,15 @@ var cbWSClient = function (url) {
 			.then(this.status)
 			.then(this.getData)
 			.then(function (data) {
-				if (myself.hasError(data) == false) {
+				if (!myself.hasError(data)) {
 					return Promise.resolve(data['result']);
 				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
 					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
 				}
 			})
@@ -623,10 +736,6 @@ var cbWSClient = function (url) {
 	 * param with_this_ids string/array either a string with one unique ID or an array of IDs to relate to the first parameter
 	 */
 	this.doSetRelated = function (relate_this_id, with_these_ids) {
-		// Perform re-login if required.
-		this.__checkLogin();
-
-		// reqtype = 'GET';
 		let postdata = 'operation=SetRelation&sessionName=' + this._sessionid + '&relate_this_id=' + relate_this_id + '&with_these_ids=' + JSON.stringify(with_these_ids);
 		this.fetchOptions.body = postdata;
 		this.fetchOptions.method = 'get';
@@ -635,9 +744,165 @@ var cbWSClient = function (url) {
 			.then(this.status)
 			.then(this.getData)
 			.then(function (data) {
-				if (myself.hasError(data) == false) {
+				if (!myself.hasError(data)) {
 					return Promise.resolve(data['result']);
 				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
+					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
+				}
+			})
+			.catch(function (error) {
+				return Promise.reject(error);
+			});
+	};
+
+	/**
+	 * Upsert Operation
+	 */
+	this.doUpsert = function (module, createFields, searchOn, updateFields) {
+		let postdata = 'operation=upsert&sessionName='+this._sessionid+'&elementType='+module+'&element='+JSON.stringify(createFields);
+		postdata += '&searchOn=' + searchOn + '&updatedfields=' + updateFields;
+		if (this._cbwsOptions && this._cbwsOptions.length > 0) {
+			postdata += `&cbwsOptions=${JSON.stringify(this._cbwsOptions)}`;
+			this._cbwsOptions = [];
+		}
+		this.fetchOptions.body = postdata;
+		this.fetchOptions.method = 'post';
+		let myself = this;
+		return fetch(this._serviceurl, this.fetchOptions)
+			.then(this.status)
+			.then(this.getData)
+			.then(function (data) {
+				if (!myself.hasError(data)) {
+					return Promise.resolve(data['result']);
+				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
+					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
+				}
+			})
+			.catch(function (error) {
+				return Promise.reject(error);
+			});
+	};
+
+	/**
+	 * Mass Update Operation
+	 */
+	this.doMassUpdate = function (elements) {
+		let postdata = this.addcbWsOptions('MassUpdate', elements, '', 'elements');
+		this.fetchOptions.body = postdata;
+		this.fetchOptions.method = 'post';
+		let myself = this;
+		return fetch(this._serviceurl, this.fetchOptions)
+			.then(this.status)
+			.then(this.getData)
+			.then(function (data) {
+				if (!myself.hasError(data)) {
+					return Promise.resolve(data['result']);
+				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
+					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
+				}
+			})
+			.catch(function (error) {
+				return Promise.reject(error);
+			});
+	};
+
+	/**
+	 * Mass Upsert Operation
+	 */
+	this.doMassUpsert = function (elements) {
+		let postdata = this.addcbWsOptions('MassCreate', elements, '', 'elements');
+		this.fetchOptions.body = postdata;
+		this.fetchOptions.method = 'post';
+		let myself = this;
+		return fetch(this._serviceurl, this.fetchOptions)
+			.then(this.status)
+			.then(this.getData)
+			.then(function (data) {
+				if (!myself.hasError(data)) {
+					return Promise.resolve(data['result']);
+				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
+					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
+				}
+			})
+			.catch(function (error) {
+				return Promise.reject(error);
+			});
+	};
+
+	/**
+	 * Mass Retrieve Operation
+	 */
+	this.doMassRetrieve = function (ids) {
+		let postdata = 'operation=MassRetrieve&sessionName=' + this._sessionid + '&ids=' + ids;
+		this.fetchOptions.body = postdata;
+		this.fetchOptions.method = 'post';
+		let myself = this;
+		return fetch(this._serviceurl, this.fetchOptions)
+			.then(this.status)
+			.then(this.getData)
+			.then(function (data) {
+				if (!myself.hasError(data)) {
+					return Promise.resolve(data['result']);
+				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
+					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
+				}
+			})
+			.catch(function (error) {
+				return Promise.reject(error);
+			});
+	};
+
+	/**
+	 * Mass Delete Operation
+	 */
+	this.doMassDelete = function (ids) {
+		let postdata = 'operation=MassDelete&sessionName=' + this._sessionid + '&ids=' + ids;
+		this.fetchOptions.body = postdata;
+		this.fetchOptions.method = 'post';
+		let myself = this;
+		return fetch(this._serviceurl, this.fetchOptions)
+			.then(this.status)
+			.then(this.getData)
+			.then(function (data) {
+				if (!myself.hasError(data)) {
+					return Promise.resolve(data['result']);
+				} else {
+					if (sessionValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.SessionExpired);
+					}
+					if (authorizationValidityDetector(data)) {
+						window.dispatchEvent(window.coreBOS.AuthorizationRequired);
+					}
 					return Promise.reject(new Error('incorrect response: '+myself.lastError()));
 				}
 			})
@@ -647,7 +912,21 @@ var cbWSClient = function (url) {
 	};
 };
 
-module.exports = cbWSClient;
+/**
+ * Authorization Validity detector/Checker
+ */
+function authorizationValidityDetector(error) {
+	//let errorCode = error.split(':')[1]?.trim() ?? '';
+	return (error.success===false && error.error.code === 'AUTHENTICATION_REQUIRED');
+}
+
+/**
+ * Session Validity detector/Checker
+ */
+function sessionValidityDetector(error) {
+	//let errorCode = error.split(':')[1]?.trim() ?? '';
+	return (error.success===false && error.error.code === 'INVALID_SESSIONID');
+}
 
 // MD5 (Message-Digest Algorithm) by WebToolkit
 // eslint-disable-next-line
