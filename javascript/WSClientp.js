@@ -53,7 +53,7 @@ var cbWSClient = function (url) {
 		this._sessionid = logindata?.sessionName;
 		this._userid = logindata?.userId;
 		if (this.fetchOptions && this.fetchOptions.headers) {
-			this.fetchOptions.headers.corebos_authorization = logindata?.sessionName;
+			this.fetchOptions.headers["corebos-authorization"] = logindata?.sessionName;
 		}
 	};
 
