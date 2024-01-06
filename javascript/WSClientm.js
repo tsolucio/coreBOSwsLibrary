@@ -53,6 +53,10 @@ export function setURL(cburl, fetchingOptions=null) {
 	}
 }
 
+function getURL() {
+	return _serviceurl;
+}
+
 function _setFetchOptions({mode, headers}) {
 	fetchOptions.mode = mode;
 	fetchOptions.headers = headers;
@@ -65,6 +69,8 @@ function addcbWsOptions(operation, valueMap=null, resource='', valueMapParam = '
 	let reqData = `operation=${operation}`;
 	if (valueMap && (typeof valueMap === 'object' || Array.isArray(valueMap))) {
 		reqData += `&${valueMapParam}=${JSON.stringify(valueMap)}`;
+	} else if (valueMap) {
+		reqData += `&${valueMapParam}=${valueMap}`;
 	}
 	if (resource) {
 		reqData += `&elementType=${resource}`;
@@ -74,6 +80,11 @@ function addcbWsOptions(operation, valueMap=null, resource='', valueMapParam = '
 		_cbwsOptions = [];
 	}
 	return reqData;
+}
+
+function setConnection(logindata) {
+	setSession(logindata);
+	setURL(logindata.host);
 }
 
 export function setSession(logindata) {
@@ -275,7 +286,7 @@ export async function doLoginPortal(username, password, hashmethod, entity) {
  */
 export function doLogout() {
 	// reqtype = 'POST';
-	let postdata = 'operation=logout';
+	let postdata = 'operation=logout&sessionName='+_sessionid;
 	fetchOptions.body = postdata;
 	fetchOptions.method = 'post';
 	return fetch(_serviceurl, fetchOptions)
