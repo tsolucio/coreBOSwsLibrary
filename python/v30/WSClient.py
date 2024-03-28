@@ -195,6 +195,10 @@ class WSClient:
         else:
             raise exception(response)
 
+    # Get Connected User ID
+    def get_userid(self):
+        return self.__userid
+
     # Do Login Operation
     def do_login(self, user_name, user_accesskey, withpassword=False):
         """
@@ -462,6 +466,8 @@ class WSClient:
         """
         if not self.__check_login():
             raise Exception('Login error')
+        if not query.endswith(";"):
+            query += ";"
 
         return self.get(
             'query',
@@ -476,6 +482,8 @@ class WSClient:
         """
         if not self.__check_login():
             raise Exception('Login error')
+        if not query.endswith(";"):
+            query += ";"
 
         ret = self.get(
             'query',
