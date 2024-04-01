@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Copyright (c) 2015, David Fernández González, All rights reserved.
 
@@ -20,7 +19,6 @@ import urllib.request
 import urllib.parse
 import hashlib
 import json
-import re
 
 __author__ = "David Fernández González"
 __license__ = "LGPL"
@@ -61,17 +59,17 @@ class WSClient:
         self.__servicebase = "webservice.php"
         self.__service_url = self.get_webservice_url(service_url)
 
-        self.__serviceuser = ""
-        self.__servicekey = ""
+        self.serviceuser = ""
+        self.servicekey = ""
 
-        self.__servertime = 0
-        self.__expiretime = 0
-        self.__servicetoken = 0
+        self.servertime = 0
+        self.expiretime = 0
+        self.servicetoken = 0
 
-        self.__sessionid = False
-        self.__userid = False
-        self.__entityid = ""
-        self.__language = ""
+        self.sessionid = False
+        self.userid = False
+        self.entityid = ""
+        self.language = ""
         self.cbwsoptions = {}
 
     def set_options(self, options):
@@ -108,23 +106,13 @@ class WSClient:
     # Get the URL for sending webservice request.
     def get_webservice_url(self, url):
         """
-        @param url:
-        @return:
+        @param url
+        @return string url
         """
-        url = re.findall(
-            "http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+",
-            url,
-        )
-
-        if len(url) >= 1:
-            url = url[0]
-            if str(url).find(self.__servicebase) < 0:
-                if str(url[len(url) - 1 :]) != "/":
-                    url += str("/")
-                url += self.__servicebase
-        else:
-            raise Exception("Invalid URL")
-
+        if url.find(self.__servicebase) < 0:
+            if not url.endswith("/"):
+                url += "/"
+            url += self.__servicebase
         return url
 
     def get(self, operation, **parameters):
@@ -138,7 +126,7 @@ class WSClient:
             del parameters["_libReturnAll"]
             return_all = True
         response = self.__do_get(
-            operation=operation, sessionName=self.__sessionid, **parameters
+            operation=operation, sessionName=self.sessionid, **parameters
         )
 
         if response["success"]:
@@ -160,7 +148,7 @@ class WSClient:
             del parameters["_libReturnAll"]
             return_all = True
         response = self.__do_post(
-            operation=operation, sessionName=self.__sessionid, **parameters
+            operation=operation, sessionName=self.sessionid, **parameters
         )
 
         if response["success"]:
@@ -173,7 +161,9 @@ class WSClient:
 
     # Check and perform login if requried.
     def __check_login(self):
-        return self.__sessionid != 0
+        if self.sessionid == 0:
+            raise Exception("Login error")
+        return True
 
     # Perform the challenge
     def __do_challenge(self, user_name):
@@ -183,16 +173,16 @@ class WSClient:
         response = self.__do_get(operation="getchallenge", username=user_name)
 
         if response["success"]:
-            self.__servicetoken = response["result"]["token"]
-            self.__servertime = response["result"]["serverTime"]
-            self.__expiretime = response["result"]["expireTime"]
+            self.servicetoken = response["result"]["token"]
+            self.servertime = response["result"]["serverTime"]
+            self.expiretime = response["result"]["expireTime"]
             return True
         else:
             raise exception(response)
 
     # Get Connected User ID
     def get_userid(self):
-        return self.__userid
+        return self.userid
 
     # Do Login Operation
     def do_login(self, user_name, user_accesskey, withpassword=False):
@@ -207,16 +197,16 @@ class WSClient:
         response = self.__do_post(
             operation="login",
             username=user_name,
-            accessKey=self.__servicetoken + user_accesskey
+            accessKey=self.servicetoken + user_accesskey
             if withpassword
-            else md5sum(self.__servicetoken + user_accesskey),
+            else md5sum(self.servicetoken + user_accesskey),
         )
 
         if response["success"]:
-            self.__sessionid = response["result"]["sessionName"]
-            self.__userid = response["result"]["userId"]
-            self.__serviceuser = user_name
-            self.__servicekey = user_accesskey
+            self.sessionid = response["result"]["sessionName"]
+            self.userid = response["result"]["userId"]
+            self.serviceuser = user_name
+            self.servicekey = user_accesskey
             return True
         else:
             raise exception(response)
@@ -235,13 +225,13 @@ class WSClient:
         if not self.__do_challenge(user_name):
             return False
         if passwordhash == "sha256":
-            accesscrypt = hashlib.sha256(self.__servicetoken + password).hexdigest()
+            accesscrypt = hashlib.sha256(self.servicetoken + password).hexdigest()
         elif passwordhash == "sha512":
-            accesscrypt = hashlib.sha512(self.__servicetoken + password).hexdigest()
+            accesscrypt = hashlib.sha512(self.servicetoken + password).hexdigest()
         elif passwordhash == "plaintext":
-            accesscrypt = self.__servicetoken + password
+            accesscrypt = self.servicetoken + password
         else:  #  passwordhash=='md5'
-            accesscrypt = md5sum(self.__servicetoken + password)
+            accesscrypt = md5sum(self.servicetoken + password)
         response = self.__do_get(
             operation="loginPortal",
             username=user_name,
@@ -250,26 +240,24 @@ class WSClient:
         )
 
         if response["success"]:
-            self.__sessionid = response["result"]["sessionName"]
-            self.__userid = response["result"]["user"]["id"]
-            self.__serviceuser = response["result"]["user"]["user_name"]
-            self.__servicekey = response["result"]["user"]["accesskey"]
-            self.__entityid = response["result"]["user"]["contactid"]
-            self.__language = response["result"]["user"]["language"]
+            self.sessionid = response["result"]["sessionName"]
+            self.userid = response["result"]["user"]["id"]
+            self.serviceuser = response["result"]["user"]["user_name"]
+            self.servicekey = response["result"]["user"]["accesskey"]
+            self.entityid = response["result"]["user"]["contactid"]
+            self.language = response["result"]["user"]["language"]
             return True
         else:
             raise exception(response)
 
     def logout(self):
-        if self.__sessionid != 0:
+        if self.sessionid != 0:
             self.post("logout")
 
     # List types available Modules.
     @property
     def do_listtypes(self):
-        if not self.__check_login():
-            raise Exception("Login error")
-
+        self.__check_login()
         return self.get("listtypes")
 
     # Describe Module Fields.
@@ -278,9 +266,7 @@ class WSClient:
         @param name:
         @return:
         """
-        if not self.__check_login():
-            raise Exception("Login error")
-
+        self.__check_login()
         return self.get("describe", elementType=name)
 
     # Do Create Operation
@@ -290,9 +276,7 @@ class WSClient:
         @param params:
         @return:
         """
-        if not self.__check_login():
-            raise Exception("Login error")
-
+        self.__check_login()
         json_data = json.dumps(params)
         return self.post("create", elementType=entity, element=json_data)
 
@@ -302,9 +286,7 @@ class WSClient:
         @param id:
         @return:
         """
-        if not self.__check_login():
-            raise Exception("Login error")
-
+        self.__check_login()
         return self.get("retrieve", id=id)
 
     # Do Update Operation
@@ -313,9 +295,7 @@ class WSClient:
         @param params:
         @return:
         """
-        if not self.__check_login():
-            raise Exception("Login error")
-
+        self.__check_login()
         json_data = json.dumps(params)
         return self.post("update", element=json_data)
 
@@ -325,9 +305,7 @@ class WSClient:
         @param params:
         @return:
         """
-        if not self.__check_login():
-            raise Exception("Login error")
-
+        self.__check_login()
         json_data = json.dumps(params)
         return self.post("revise", element=json_data)
 
@@ -340,9 +318,7 @@ class WSClient:
         @param updateFields:
         @return:
         """
-        if not self.__check_login():
-            raise Exception("Login error")
-
+        self.__check_login()
         return self.post(
             "upsert",
             elementType=modulename,
@@ -357,9 +333,7 @@ class WSClient:
         @param id:
         @return:
         """
-        if not self.__check_login():
-            raise Exception("Login error")
-
+        self.__check_login()
         return self.post("delete", id=id)
 
     # Do Mass Delete Operation
@@ -368,9 +342,7 @@ class WSClient:
         @param ids:
         @return:
         """
-        if not self.__check_login():
-            raise Exception("Login error")
-
+        self.__check_login()
         return self.post("MassDelete", ids=ids)
 
     # Do Mass Retrieve Operation
@@ -379,9 +351,7 @@ class WSClient:
         @param ids:
         @return:
         """
-        if not self.__check_login():
-            raise Exception("Login error")
-
+        self.__check_login()
         return self.post("MassRetrieve", ids=ids)
 
     # Do Mass Update Operation
@@ -390,9 +360,7 @@ class WSClient:
         @param elements:
         @return:
         """
-        if not self.__check_login():
-            raise Exception("Login error")
-
+        self.__check_login()
         return self.post("MassUpdate", elements=json.dumps(elements))
 
     # Do Mass Upsert Operation
@@ -401,9 +369,7 @@ class WSClient:
         @param elements:
         @return:
         """
-        if not self.__check_login():
-            raise Exception("Login error")
-
+        self.__check_login()
         return self.post("MassCreate", elements=json.dumps(elements))
 
     # Do Validate Information Operation
@@ -414,8 +380,7 @@ class WSClient:
         @param recordinformation:
         @return:
         """
-        if not self.__check_login():
-            raise Exception("Login error")
+        self.__check_login()
         if "module" not in recordinformation:
             recordinformation["module"] = module
         if "module" not in recordinformation:
@@ -428,11 +393,9 @@ class WSClient:
         @param query:
         @return:
         """
-        if not self.__check_login():
-            raise Exception("Login error")
+        self.__check_login()
         if not query.endswith(";"):
             query += ";"
-
         return self.get("query", query=query)
 
     # Do Query Operation
@@ -441,11 +404,9 @@ class WSClient:
         @param query:
         @return:
         """
-        if not self.__check_login():
-            raise Exception("Login error")
+        self.__check_login()
         if not query.endswith(";"):
             query += ";"
-
         ret = self.get("query", query=query, _libReturnAll=True)
         return {"result": ret["result"], "totalrows": ret["moreinfo"]["totalrows"]}
 
@@ -457,9 +418,7 @@ class WSClient:
         @param metod_type:
         @return:
         """
-        if not self.__check_login():
-            raise Exception("Login error")
-
+        self.__check_login()
         if metod_type.upper() == "POST":
             response = self.post(metod, **params)
         else:
@@ -476,9 +435,7 @@ class WSClient:
         :param queryparameters:
         :raise 'Login error':
         """
-        if not self.__check_login():
-            raise Exception("Login error")
-
+        self.__check_login()
         params = {
             "id": record,
             "module": module,
@@ -499,9 +456,7 @@ class WSClient:
         :param with_this_ids:
         :raise 'Login error':
         """
-        if not self.__check_login():
-            raise Exception("Login error")
-
+        self.__check_login()
         params = {"relate_this_id": relate_this_id, "with_these_ids": with_this_ids}
         response = self.post("SetRelation", **params)
         return response
