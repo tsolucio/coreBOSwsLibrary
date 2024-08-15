@@ -1,10 +1,8 @@
-/**
- * This is for testing updates for dataProvider, 
- * just paste/replace the content below with the updated one and import/use as R-A dataProvider
- */
-
+//@ts-ignore
 import { DataProvider } from 'react-admin';
-import { doCreate, doDelete, doInvoke, doMassDelete, doMassRetrieve, doQueryWithTotal, doRetrieve, doUpdate } from '../utils/lib';
+//import { doCreate, doDelete, doInvoke, doMassDelete, doMassRetrieve, doQueryWithTotal, doRetrieve, doUpdate } from '../utils/lib';
+//@ts-ignore
+import * as cbconn from 'corebos-ws-lib/WSClientm';
 
 
 
@@ -241,7 +239,7 @@ const execQuery = (resource: string, quesrParams: any, additionalWhereClause?: a
     }
 
     query = encodeURIComponent(query);
-    return doQueryWithTotal(query).then((data: any) => {
+    return cbconn.doQueryWithTotal(query).then((data: any) => {
         return { 'data': data.result, 'total': Number(data.totalrows) }
     }).catch((er: any) => {
         return { data: [], total: 0 }
@@ -267,12 +265,12 @@ const dataProvider: DataProvider = {
     },
 
     getOne: (resource: string, params: any) =>
-        doRetrieve(params.id)
+        cbconn.doRetrieve(params.id)
             .then((data: any) => { return { 'data': data } })
     ,
 
     getMany: (resource: string, params: any) =>
-        doMassRetrieve(params.ids)
+        cbconn.doMassRetrieve(params.ids)
             .then((data: any) => {
                 let d = [];
                 for (const value of Object.values(data)) {
@@ -287,27 +285,27 @@ const dataProvider: DataProvider = {
     },
 
     update: (resource: string, params: any) =>
-        doUpdate(resource, params.data)
+        cbconn.doUpdate(resource, params.data)
             .then((data: any) => { return { 'data': data } })
     ,
 
     updateMany: (resource: string, params: any) =>
-        doInvoke('MassUpdate', JSON.stringify(params.data))
+        cbconn.doInvoke('MassUpdate', JSON.stringify(params.data))
             .then((data: any) => { return { 'data': data } })
     ,
 
     create: (resource: string, params: any) =>
-        doCreate(resource, params.data)
+        cbconn.doCreate(resource, params.data)
             .then((data: any) => { return { 'data': data, id: data['id'] } })
     ,
 
     delete: (resource: string, params: any) =>
-        doDelete(params.id)
+        cbconn.doDelete(params.id)
             .then((data: any) => { return { 'data': data } })
     ,
 
     deleteMany: (resource: string, params: any) =>
-        doMassDelete(params.ids)
+        cbconn.doMassDelete(params.ids)
             .then((data: any) => { return { 'data': data } })
 };
 
