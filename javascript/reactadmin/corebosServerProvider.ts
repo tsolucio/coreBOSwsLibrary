@@ -1,5 +1,4 @@
-//@ts-ignore
-import { DataProvider } from 'react-admin';
+
 //import { doCreate, doDelete, doInvoke, doMassDelete, doMassRetrieve, doQueryWithTotal, doRetrieve, doUpdate } from '../utils/lib';
 //@ts-ignore
 import * as cbconn from 'corebos-ws-lib/WSClientm';
@@ -255,7 +254,7 @@ export const appendOrder = (field: any, order: string) => {
     return ' order by ' + field + ' ' + order;
 };
 
-const dataProvider: DataProvider = {
+const dataProvider: any = { // react-admin DataProvider 
     getList: async (resource: string, params: any, additionalWhereClause?: string, additionalFields?: any) => {
         params = {
             ...params,
