@@ -272,7 +272,7 @@ const dataProvider: DataProvider = {
     getMany: (resource: string, params: any) =>
         cbconn.doMassRetrieve(params.ids)
             .then((data: any) => {
-                let d = [];
+                let d: any = [];
                 for (const value of Object.values(data)) {
                     d.push(value);
                 }
