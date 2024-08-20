@@ -24,14 +24,6 @@ var _language = ''
 // Last operation error information
 var _lasterror = false;
 
-//Session Expiry event
-if (typeof window.coreBOS == 'undefined') {
-	window.coreBOS = {};
-}
-window.coreBOS.SessionExpired = new CustomEvent('coreBOSSessionExpiredEvent', {});
-//Authorization Required event
-window.coreBOS.AuthorizationRequired = new CustomEvent('coreBOSAuthorizationRequiredEvent', {});
-
 // Version
 var version = 'coreBOS2.1';
 
@@ -44,6 +36,14 @@ var fetchOptions = {
 };
 
 export function setURL(cburl, fetchingOptions=null) {
+	if (window.coreBOS === undefined) {
+		window.coreBOS = {};
+	}
+	//Session Expiry event
+	window.coreBOS.SessionExpired = new CustomEvent('coreBOSSessionExpiredEvent', {});
+	//Authorization Required event
+	window.coreBOS.AuthorizationRequired = new CustomEvent('coreBOSAuthorizationRequiredEvent', {});
+	
 	if (cburl && cburl!=='') {
 		// Format the url before appending servicebase
 		_serviceurl = cburl + (cburl.substr(cburl.length - 1) === '/' ? '' : '/') + _servicebase;
