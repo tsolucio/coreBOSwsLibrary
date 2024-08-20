@@ -1,11 +1,4 @@
-import * as cbconn from 'corebos-ws-lib/WSClientm';
-
-/* const logdata = localStorage.getItem('coreboslogindata');
-if (!logdata) {
-    cbconn.doLogin('admin', 'admin', true);
-} else {
-    cbconn.setSession(JSON.parse(logdata));
-} */
+import * as cbconn from '@corebos/ws-lib/WSClientm';
 
 function convertFilter2Query(filter, joinCondition = 'OR', resource, relatedModule='') {
     let search = '';

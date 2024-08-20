@@ -1,7 +1,5 @@
-
-//import { doCreate, doDelete, doInvoke, doMassDelete, doMassRetrieve, doQueryWithTotal, doRetrieve, doUpdate } from '../utils/lib';
 //@ts-ignore
-import * as cbconn from 'corebos-ws-lib/WSClientm';
+import * as cbconn from '@corebos/ws-lib/WSClientm';
 
 
 
