@@ -1,12 +1,5 @@
 // Include crypto-js library if you need to use doLoginPortal
 
-//Session Expiry event
-if (typeof window.coreBOS == 'undefined') {
-	window.coreBOS = {};
-}
-window.coreBOS.SessionExpired = new CustomEvent('coreBOSSessionExpiredEvent', {});
-//Authorization Required event
-window.coreBOS.AuthorizationRequired = new CustomEvent('coreBOSAuthorizationRequiredEvent', {});
 
 var cbWSClient = function (url) {
 	this._servicebase = 'webservice.php';
@@ -65,6 +58,14 @@ var cbWSClient = function (url) {
 	};
 
 	this.setURL = function (cburl, fetchingOptions=null) {
+		if (window.coreBOS === undefined) {
+			window.coreBOS = {};
+		}
+		//Session Expiry event
+		window.coreBOS.SessionExpired = new CustomEvent('coreBOSSessionExpiredEvent', {});
+		//Authorization Required event
+		window.coreBOS.AuthorizationRequired = new CustomEvent('coreBOSAuthorizationRequiredEvent', {});
+		
 		if (cburl!=='') {
 			// Format the url before appending servicebase
 			this._serviceurl = cburl + (cburl.substr(cburl.length - 1) === '/' ? '' : '/') + this._servicebase;
